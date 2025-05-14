@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Configuración de la conexión a la base de datos
 const db = new Pool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -14,12 +15,100 @@ const db = new Pool({
     }
 })
 
+// Funcines para listar datos de las tablas de la BD
 const listarUsuarios = async () => {
-    const res = await db.query('SELECT * FROM usuarios');
+    const res = await db.query('SELECT * FROM usuarios WHERE activo = TRUE');
     return res.rows;
 };
 
+const listarLugares = async () => {
+    const res = await db.query('SELECT * FROM lugares WHERE activo = TRUE');
+    return res.rows;
+};
+
+const listarLogros = async () => {
+    const res = await db.query('SELECT * FROM logros WHERE activo = TRUE');
+    return res.rows;
+};
+
+const listarColeccionables = async () => {
+    const res = await db.query('SELECT * FROM coleccionables WHERE activo = TRUE');
+    return res.rows;
+};
+
+const insertarUsuario = async (nombre, email, password, foto_perfil, biografia) => {
+    console.log({ nombre, email, password, foto_perfil, biografia });
+    const res = await db.query(
+            `INSERT INTO usuarios (
+                nombre,
+                correo,
+                contraseña_hash,
+                foto_perfil,
+                biografia,
+                fecha_registro,
+                tipo_usuario,         
+                ultima_conexion
+            ) VALUES (
+                $1, $2, $3, $4, $5, NOW(), 'turista', NULL
+            ) RETURNING *`,
+            [nombre, email, password, foto_perfil || null, biografia || null]
+        );
+
+    return res.rows;
+};
+
+const insertarAdmin = async (nombre, email, password) => {
+    console.log({ nombre, email, password });
+    const res = await db.query(
+            `INSERT INTO usuarios (
+                nombre,
+                correo,
+                contraseña_hash,
+                foto_perfil,
+                biografia,
+                fecha_registro,
+                tipo_usuario,         
+                ultima_conexion
+            ) VALUES (
+                $1, $2, $3, NULL, NULL, NOW(), 'admin', NULL
+            ) RETURNING *`,
+            [nombre, email, password, foto_perfil || null, biografia || null]
+        );
+
+    return res.rows;
+};
+
+const eliminarUsuarioByID = async (id) => {
+    const res = await db.query(
+        'UPDATE usuarios SET activo = FALSE WHERE id_usuario = $1 RETURNING *',
+        [id]
+    );
+
+    const usuarios = listarUsuarios();
+    console.log(usuarios);
+    return res;
+}
+
+const eliminarUsuarioByNombre = async (nombre) => {
+    const res = await db.query(
+        'UPDATE usuarios SET activo = FALSE WHERE nombre = $1 RETURNING *',
+        [nombre]
+    );
+
+    const usuarios = listarUsuarios();
+    console.log(usuarios);
+    return res;
+}
+
+
 module.exports = {
     listarUsuarios,
+    listarLugares,
+    listarLogros,
+    listarColeccionables,
+    insertarUsuario,
+    insertarAdmin,
+    eliminarUsuarioByID,
+    eliminarUsuarioByNombre,
     db,
 };
