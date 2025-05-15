@@ -84,8 +84,6 @@ const eliminarUsuarioByID = async (id) => {
         [id]
     );
 
-    const usuarios = listarUsuarios();
-    console.log(usuarios);
     return res;
 }
 
@@ -95,10 +93,24 @@ const eliminarUsuarioByNombre = async (nombre) => {
         [nombre]
     );
 
-    const usuarios = listarUsuarios();
-    console.log(usuarios);
     return res;
 }
+
+const buscarUsuarioByID = async (id) => {
+    const res = await db.query(
+        'SELECT * FROM usuarios WHERE id_usuario = $1 AND activo = TRUE;',
+        [id]
+    );
+    return res.rows;
+};
+
+const buscarUsuarioByNombre = async (name) => {
+    const res = await db.query(
+        'SELECT * FROM usuarios WHERE LOWER(nombre) LIKE LOWER($1) AND activo = TRUE;',
+        [`%${name}%`]
+    );
+    return res.rows;
+};
 
 
 module.exports = {
@@ -110,5 +122,7 @@ module.exports = {
     insertarAdmin,
     eliminarUsuarioByID,
     eliminarUsuarioByNombre,
+    buscarUsuarioByID,
+    buscarUsuarioByNombre,
     db,
 };

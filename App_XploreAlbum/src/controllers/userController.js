@@ -38,8 +38,38 @@ const deleteUserByName = async (req, res) => {
     }
 }
 
+const searchUserById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const usuario = await db.buscarUsuarioByID(id);
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        return res.json(usuario);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al buscar el usuario' });
+    }
+}
+
+const searchUserByName = async (req, res) => {
+    try {
+        const { name } = req.params;
+        const usuario = await db.buscarUsuarioByNombre(name);
+        if (!usuario) {
+            return res.status(404).json({ error: 'No se encontraron coincidencias' });
+        }
+        return res.json(usuario);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al buscar usuarios' });
+    }
+}
+
 module.exports = {
     list,
     deleteUserById,
-    deleteUserByName
+    deleteUserByName,
+    searchUserById,
+    searchUserByName
 };

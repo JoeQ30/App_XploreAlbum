@@ -27,7 +27,8 @@ router.post('/auth/register_admin', authController.registerAdmin);
 router.get('/users', userController.list);
 router.delete('/users/:id', userController.deleteUserById);
 router.delete('/delete_user', userController.deleteUserByName);
-//router.get('/users/:id', userController.get);
+router.get('/users/search/:name', userController.searchUserByName);
+router.get('/users/:id', userController.searchUserById);
 //router.put('/users/:id', userController.update);
 
 // -------- Seguimientos --------
