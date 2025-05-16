@@ -1,16 +1,15 @@
 const db = require('../db'); 
 
-const list = async (req, res) => {
+const list = async (req, res, next) => {
     try {
         const usuarios = await db.listarUsuarios(); 
         return res.json(usuarios);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al obtener los usuarios' });
+        next(error);
     }
 }
 
-const deleteUserById = async (req, res) => {
+const deleteUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const result = await db.eliminarUsuarioByID(id);
@@ -19,12 +18,11 @@ const deleteUserById = async (req, res) => {
 
         return res.status(200).json({ message: 'El usuario ha sido removido con éxito...' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al eliminar el usuario' });
+        next(error);
     }
 }
 
-const deleteUserByName = async (req, res) => {
+const deleteUserByName = async (req, res, next) => {
     try {
         const { nombre } = req.body;
         const res = await db.eliminarUsuarioByNombre(nombre);
@@ -33,12 +31,11 @@ const deleteUserByName = async (req, res) => {
 
         return res.status(200).json({ message: 'El usuario ha sido removido con éxito...' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al eliminar el usuario' });
+        next(error);
     }
 }
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const usuario = await db.getUsuarioByID(id);
@@ -47,12 +44,11 @@ const getUserById = async (req, res) => {
         }
         return res.json(usuario);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al buscar el usuario' });
+        next(error);
     }
 }
 
-const getUserByName = async (req, res) => {
+const getUserByName = async (req, res, next) => {
     try {
         const { name } = req.params;
         const usuario = await db.getUsuarioByNombre(name);
@@ -61,12 +57,11 @@ const getUserByName = async (req, res) => {
         }
         return res.json(usuario);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al buscar usuarios' });
+        next(error);
     }
 }
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { nombre, correo, password, foto_perfil, biografia, visibilidad_perfil } = req.body;
@@ -85,8 +80,7 @@ const updateUser = async (req, res) => {
         }
         return res.json(usuario);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al actualizar usuario' });
+        next(error);
     }
 };
 

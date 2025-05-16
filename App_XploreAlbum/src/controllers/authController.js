@@ -2,7 +2,7 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
     try {
         const { nombre, email, password, foto_perfil, biografia } = req.body;
 
@@ -24,12 +24,11 @@ const registerUser = async (req, res) => {
 
         return res.status(200).json(usuario);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al registrar el usuario' });
+        next(error);
     }
 };
 
-const registerAdmin = async (req, res) => {
+const registerAdmin = async (req, res, next) => {
     try {
         const { nombre, email, password } = req.body;
 
@@ -47,13 +46,12 @@ const registerAdmin = async (req, res) => {
 
         return res.status(200).json(res.rows);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al registrar el usuario' });
+        next(error);
     }
 };
 
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const { email, password } = req.body;
 
     console.log({ email, password });
@@ -93,20 +91,18 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error en login:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        next(error);
     }
 };
 
 
 
-const logout = (req, res) => {
+const logout = (req, res, next) => {
     try {
         // Respuesta al cliente para eliminar el token del lado del cliente        
         res.status(200).json({ mensaje: 'Logout exitoso' });
     } catch (error) {
-        console.error('Error en logout:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        next(error);
     }
 };
 

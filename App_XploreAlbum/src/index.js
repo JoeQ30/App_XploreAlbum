@@ -7,6 +7,12 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use(taskRoutes);
+// Middleware para manejar errores
+app.use((err, req, res, next) => {
+    return res.json({
+        error: err.message || 'An unexpected error occurred'
+    });
+});
 
 app.listen(3000);
 console.log('Server is running on port 3000');
