@@ -42,7 +42,7 @@ const insertarUsuario = async (nombre, email, password, foto_perfil, biografia) 
             `INSERT INTO usuarios (
                 nombre,
                 correo,
-                contraseña_hash,
+                password_hash,
                 foto_perfil,
                 biografia,
                 fecha_registro,
@@ -63,7 +63,7 @@ const insertarAdmin = async (nombre, email, password) => {
             `INSERT INTO usuarios (
                 nombre,
                 correo,
-                contraseña_hash,
+                password_hash,
                 foto_perfil,
                 biografia,
                 fecha_registro,
@@ -96,19 +96,42 @@ const eliminarUsuarioByNombre = async (nombre) => {
     return res;
 }
 
-const buscarUsuarioByID = async (id) => {
+const getUsuarioByID = async (id) => {
     const res = await db.query(
         'SELECT * FROM usuarios WHERE id_usuario = $1 AND activo = TRUE;',
         [id]
     );
-    return res.rows;
+    return res.rows[0];
 };
 
-const buscarUsuarioByNombre = async (name) => {
+const getUsuarioByNombre = async (name) => {
     const res = await db.query(
         'SELECT * FROM usuarios WHERE LOWER(nombre) LIKE LOWER($1) AND activo = TRUE;',
         [`%${name}%`]
     );
+    return res.rows[0];
+};
+
+const getUsuarioByCorreo = async (email) => {
+    const res = await db.query(
+        'SELECT * FROM usuarios WHERE correo LIKE $1 AND activo = TRUE;',
+        [email]
+    );
+    return res.rows[0];
+};
+
+const updateUsuario = async (id, nombre, email, foto_perfil, biografia, visibilidad_perfil) => {
+    const res = await db.query(
+        `UPDATE usuarios SET 
+            nombre = $1,
+            correo = $2,
+            foto_perfil = $3,
+            biografia = $4,
+            visibilidad_perfil = $5
+        WHERE id_usuario = $6 RETURNING *`,
+        [nombre, email, foto_perfil || null, biografia || null, visibilidad_perfil, id]
+    );
+
     return res.rows;
 };
 
@@ -122,7 +145,9 @@ module.exports = {
     insertarAdmin,
     eliminarUsuarioByID,
     eliminarUsuarioByNombre,
-    buscarUsuarioByID,
-    buscarUsuarioByNombre,
+    getUsuarioByID,
+    getUsuarioByNombre,
+    getUsuarioByCorreo,
+    updateUsuario,
     db,
 };

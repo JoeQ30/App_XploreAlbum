@@ -27,7 +27,7 @@ const deleteUserById = async (req, res) => {
 const deleteUserByName = async (req, res) => {
     try {
         const { nombre } = req.body;
-        const result = await db.eliminarUsuarioByNombre(nombre);
+        const res = await db.eliminarUsuarioByNombre(nombre);
         const usuarios = await db.listarUsuarios();
         console.log(usuarios);
 
@@ -38,10 +38,10 @@ const deleteUserByName = async (req, res) => {
     }
 }
 
-const searchUserById = async (req, res) => {
+const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
-        const usuario = await db.buscarUsuarioByID(id);
+        const usuario = await db.getUsuarioByID(id);
         if (!usuario) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
@@ -52,10 +52,10 @@ const searchUserById = async (req, res) => {
     }
 }
 
-const searchUserByName = async (req, res) => {
+const getUserByName = async (req, res) => {
     try {
         const { name } = req.params;
-        const usuario = await db.buscarUsuarioByNombre(name);
+        const usuario = await db.getUsuarioByNombre(name);
         if (!usuario) {
             return res.status(404).json({ error: 'No se encontraron coincidencias' });
         }
@@ -66,10 +66,35 @@ const searchUserByName = async (req, res) => {
     }
 }
 
+const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, correo, password, foto_perfil, biografia, visibilidad_perfil } = req.body;
+
+        const usuario = await db.updateUsuario(
+            id, 
+            nombre, 
+            correo, 
+            password, 
+            foto_perfil, 
+            biografia, 
+            visibilidad_perfil // solo dos estados -> 'publico' o 'solo_seguidores'
+        );
+        if (!usuario) {
+            return res.status(404).json({ error: 'No se encontró al usuario a actualizar' });
+        }
+        return res.json(usuario);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+};
+
 module.exports = {
     list,
     deleteUserById,
     deleteUserByName,
-    searchUserById,
-    searchUserByName
+    getUserById,
+    getUserByName,
+    updateUser
 };

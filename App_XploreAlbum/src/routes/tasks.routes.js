@@ -20,16 +20,16 @@ const adminController = require('../controllers/adminController');
 // -------- Autenticación --------
 router.post('/auth/register_user', authController.registerUser);
 router.post('/auth/register_admin', authController.registerAdmin);
-//router.post('/auth/login', authController.login);
-//router.post('/auth/logout', authController.logout);
+router.post('/auth/login', authController.login);
+router.post('/auth/logout', authController.logout);
 
 // -------- Usuarios --------
 router.get('/users', userController.list);
 router.delete('/users/:id', userController.deleteUserById);
-router.delete('/delete_user', userController.deleteUserByName);
-router.get('/users/search/:name', userController.searchUserByName);
-router.get('/users/:id', userController.searchUserById);
-//router.put('/users/:id', userController.update);
+router.delete('/users', userController.deleteUserByName);
+router.get('/users/search/:name', userController.getUserByName);
+router.get('/users/:id', userController.getUserById);
+router.put('/users/:id', userController.updateUser);
 
 // -------- Seguimientos --------
 //router.post('/users/:id/follow', followController.follow);
