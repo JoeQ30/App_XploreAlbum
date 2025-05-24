@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import LoginForm from './components/LoginForm';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Empezando desarrollo de XploreAlbum</Text>
-      <StatusBar style="auto" />
+      <LoginForm />
     </View>
   );
 }
