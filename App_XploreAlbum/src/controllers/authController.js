@@ -53,6 +53,7 @@ const registerAdmin = async (req, res, next) => {
 
 
 const login = async (req, res, next) => {
+    console.log('BODY: ', req.body);
     const { email, password } = req.body;
 
     console.log({ email, password });

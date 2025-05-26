@@ -15,7 +15,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = 3000;
-const HOST = '0.0.0.0'; // para que acepte conexiones externas
+const HOST = '192.168.7.241'; // para que acepte conexiones externas
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor corriendo en http://${HOST}:${PORT}`);
