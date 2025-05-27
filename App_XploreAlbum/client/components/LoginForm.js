@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
 
+const logo = require('../assets/images/Letter1-F_Verde.png');
+
 export default function LoginForm() {
-  const [correo, setCorreo] = useState('Loisbecket@gmail.com');
+  const [correo, setCorreo] = useState('');
   const [contraseña, setContraseña] = useState('');
   const [recordarme, setRecordarme] = useState(false);
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
       const userData = await login(correo, contraseña);
       console.log(correo, contraseña);
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
-      // TODO -> REAC-NAVIGATION para siguiente pantalla
+      navigation.navigate('Navigator');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Credenciales inválidas');
@@ -22,8 +26,8 @@ export default function LoginForm() {
   return (
     <View style={styles.container}>
       {/* Logo */}
-      <Image source={require('../assets/images/Letter1-F_Verde.png')} style={styles.logo} />
-      
+      <Image source={logo} style={styles.logo} />
+
       {/* Tarjeta de login */}
       <View style={styles.loginCard}>
         <Text style={styles.title}>Iniciar Sesión</Text>
@@ -42,6 +46,7 @@ export default function LoginForm() {
           onChangeText={setCorreo}
           autoCapitalize="none"
           keyboardType="email-address"
+          placeholder="usuario@ejemplo.com"
         />
 
         <Text style={styles.label}>Contraseña</Text>
@@ -88,7 +93,7 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   logo: {
-    width: 250,
+    width: 300,
     height: 100,
     resizeMode: 'contain',
     marginBottom: 50,

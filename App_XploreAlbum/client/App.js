@@ -1,20 +1,30 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import LoginForm from './components/LoginForm';
+import AppNavigator from './components/AppNavigator'; 
+import NotificationsScreen from './components/NotificationsScreen';
+import AchievementsScreen from './components/AchievementsScreen';
+import UserProfile from './components/UserProfile'; 
+import SplashScreen from './components/SplashScreen'; 
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
+
+  // Una vez que termina la carga, mostrar la navegación principal
   return (
-    <View style={styles.container}>
-      <LoginForm />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginForm} />
+        <Stack.Screen name="Navigator" component={AppNavigator} />
+        <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} />
+        <Stack.Screen name="Splash" component={SplashScreen} /> 
+        <Stack.Screen name="Profile" component={UserProfile} />
+
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
