@@ -36,55 +36,55 @@ router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', userController.updateUser);
 
 // -------- Seguimientos --------
-//router.post('/users/:id/follow', followController.follow);
-//router.delete('/users/:id/unfollow', followController.unfollow);
-//router.get('/users/:id/followers', followController.getFollowers);
-//router.get('/users/:id/following', followController.getFollowing);
+router.post('/users/:id/follow', followController.follow);
+router.delete('/users/:id/unfollow', followController.unfollow);
+router.get('/users/:id/followers', followController.getFollowers);
+router.get('/users/:id/following', followController.getFollowing);
 
 // -------- Lugares y categorías --------
 router.get('/places', placeController.list);
-//router.get('/places/:id', placeController.get);
-//router.get('/places/:id/history', placeController.getHistory);
-//router.get('/places/:id/schedule', placeController.getSchedule);
-//router.get('/categories', placeController.getCategories);
+router.get('/places/:id', placeController.get);
+router.get('/places/:id/history', placeController.getHistory);
+router.get('/places/:id/schedule', placeController.getSchedule);
+router.get('/categories', placeController.getCategories);
 
 // -------- Fotos --------
-//router.post('/photos', photoController.upload);
-//router.get('/photos/:id', photoController.get);
-//router.delete('/photos/:id', photoController.remove);
-//router.get('/users/:id/photos', photoController.getByUser);
-//router.get('/places/:id/photos', photoController.getByPlace);
+router.post('/photos', photoController.upload);
+router.get('/photos/:id', photoController.get);
+router.delete('/photos/:id', photoController.remove);
+router.get('/users/:id/photos', photoController.getByUser);
+router.get('/places/:id/photos', photoController.getByPlace);
 
 // -------- Álbumes --------
-//router.post('/albums', albumController.create);
-//router.get('/albums/:id', albumController.get);
-//router.put('/albums/:id', albumController.update);
-//router.delete('/albums/:id', albumController.remove);
-//router.post('/albums/:id/photos', albumController.addPhoto);
-//router.delete('/albums/:id/photos/:pid', albumController.removePhoto);
-//router.get('/users/:id/albums', albumController.getByUser);
+router.post('/albums', albumController.create);
+router.get('/albums/:id', albumController.get);
+router.put('/albums/:id', albumController.update);
+router.delete('/albums/:id', albumController.remove);
+router.post('/albums/:id/photos', albumController.addPhoto);
+router.delete('/albums/:id/photos/:pid', albumController.removePhoto);
+router.get('/users/:id/albums', albumController.getByUser);
 
 // -------- Logros --------
 router.get('/achievements', achievementController.list);
-//router.get('/users/:id/achievements', achievementController.getByUser);
+router.get('/users/:id/achievements', achievementController.getByUser);
 
 // -------- Coleccionables --------
 router.get('/collectibles', collectibleController.list);
-//router.get('/users/:id/collectibles', collectibleController.getByUser);
+router.get('/users/:id/collectibles', collectibleController.getByUser);
 
 // -------- Ubicación y visitas --------
-//router.post('/locations/validate', locationController.validateLocation);
-//router.post('/places/:id/visit', locationController.registerVisit);
-//router.get('/users/:id/visits', locationController.getUserVisits);
+router.post('/locations/validate', locationController.validateLocation);
+router.post('/places/:id/visit', locationController.registerVisit);
+router.get('/users/:id/visits', locationController.getUserVisits);
 
 // -------- Notificaciones --------
-//router.get('/notifications', notificationController.getAll);
-//router.put('/notifications/:id/read', notificationController.markAsRead);
+router.get('/notifications', notificationController.getAll);
+router.put('/notifications/:id/read', notificationController.markAsRead);
 
 // -------- Admin --------
-//router.get('/admin/photos/pending', adminController.getPendingPhotos);
-//router.put('/admin/photos/:id', adminController.reviewPhoto);
-//router.get('/admin/users', adminController.getUsers);
-//router.delete('/admin/users/:id', adminController.removeUser);
+router.get('/admin/photos/pending', adminController.getPendingPhotos);
+router.put('/admin/photos/:id', adminController.reviewPhoto);
+router.get('/admin/users', adminController.getUsers);
+router.delete('/admin/users/:id', adminController.removeUser);
 
 module.exports = router;
