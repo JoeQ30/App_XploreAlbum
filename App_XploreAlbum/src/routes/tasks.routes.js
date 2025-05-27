@@ -16,6 +16,10 @@ const collectibleController = require('../controllers/collectibleController');
 const locationController = require('../controllers/locationController');
 const notificationController = require('../controllers/notificationController');
 const adminController = require('../controllers/adminController');
+const iaRoutes = require('./iaRoutes');
+
+// -------- IA y Reconocimiento de Imágenes --------
+router.use('/ai', iaRoutes);
 
 // -------- Autenticación --------
 router.post('/auth/register_user', authController.registerUser);
