@@ -17,7 +17,8 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = 3000;
-const HOST = process.env.API_BACK_HOST;
+//const HOST = '192.168.7.241'; // para que acepte conexiones externas
+const HOST = '192.168.56.1';
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor corriendo en http://${HOST}:${PORT}`);
