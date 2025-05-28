@@ -53,11 +53,8 @@ const registerAdmin = async (req, res, next) => {
 
 
 const login = async (req, res, next) => {
-    console.log('BODY: ', req.body);
     const { email, password } = req.body;
-
-    console.log({ email, password });
-
+    console.log('Datos de login:', { email, password });
     try {
         const usuario = await db.getUsuarioByCorreo(email);
 
@@ -82,6 +79,20 @@ const login = async (req, res, next) => {
             { expiresIn: '1d' }
         );
 
+        const usuarioUpdated = await db.setUltimaConexion(usuario.id_usuario);
+        console.log('Fecha Loguin Usuario actualizado:', usuarioUpdated.ultima_conexion);
+
+        console.log({usuario: {
+                id: usuarioUpdated.id_usuario,
+                nombre: usuarioUpdated.nombre,
+                correo: usuarioUpdated.correo,
+                foto_perfil: usuarioUpdated.foto_perfil,
+                biografia: usuarioUpdated.biografia,
+                fecha_registro: usuarioUpdated.fecha_registro,
+                ultima_conexion: usuarioUpdated.ultima_conexion,
+                tipo_usuario: usuarioUpdated.tipo_usuario,
+            }})
+
         res.status(200).json({
             mensaje: 'Login exitoso',
             token,
@@ -89,6 +100,10 @@ const login = async (req, res, next) => {
                 id: usuario.id_usuario,
                 nombre: usuario.nombre,
                 correo: usuario.correo,
+                foto_perfil: usuario.foto_perfil,
+                biografia: usuario.biografia,
+                fecha_registro: usuario.fecha_registro,
+                ultima_conexion: usuario.ultima_conexion,
                 tipo_usuario: usuario.tipo_usuario,
             }
         });
