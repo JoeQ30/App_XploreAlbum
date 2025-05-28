@@ -54,7 +54,7 @@ router.get('/categories', placeController.getCategories);
 router.post('/photos', photoController.upload);
 router.get('/photos/:id', photoController.get);
 router.delete('/photos/:id', photoController.remove);
-router.get('/users/:id/photos', photoController.getByUser);
+router.get('/photos', photoController.listar);
 router.get('/places/:id/photos', photoController.getByPlace);
 
 // -------- Álbumes --------

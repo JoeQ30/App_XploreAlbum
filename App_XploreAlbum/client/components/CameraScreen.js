@@ -216,7 +216,7 @@ const CameraScreen = () => {
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <Text style={styles.headerTitle}>
           <Image 
-            source={require('../assets/images/Letter1-F_Gris.png')} 
+            source={require('../assets/images/logo/Letter1-F_Gris.png')} 
             style={styles.logoImage}
             resizeMode="contain"
           />

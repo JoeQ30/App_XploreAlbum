@@ -261,9 +261,20 @@ const getAlbumsByUsuario = async (id_usuario) => {
 
 const getColeccionablesByUsuario = async (id_usuario) => {
     const res = await db.query(`
-        SELECT c.* FROM coleccionables c
-        JOIN usuario_coleccionables u ON c.id_coleccionable = u.id_coleccionable
-        WHERE u.id_usuario = $1`, [id_usuario]);
+        SELECT 
+            c.*,
+            CASE 
+                WHEN u.id_usuario IS NOT NULL THEN true 
+                ELSE false 
+            END as desbloqueado,
+            u.fecha_desbloqueo,
+            u.id_foto_desbloqueo as foto_desbloqueo_usuario
+        FROM coleccionables c
+        LEFT JOIN usuario_coleccionables u ON c.id_coleccionable = u.id_coleccionable 
+            AND u.id_usuario = $1
+        WHERE c.activo = true
+        ORDER BY c.id_coleccionable
+    `, [id_usuario]);
     return res.rows;
 };
 
@@ -355,9 +366,9 @@ const getFotosByLugar = async (id) => {
     return res.rows;
 };
 
-const getLugarByID = async (id) => {
-    const res = await db.query(`SELECT * FROM lugares WHERE id_lugar = $1`, [id]);
-    return res.rows[0];
+const getFotos = async () => {
+    const res = await db.query(`SELECT * FROM fotos`);
+    return res.rows;
 };
 
 const getDatosHistoricos = async (id_lugar) => {
@@ -418,7 +429,7 @@ module.exports = {
     eliminarFoto,
     getFotosByUsuario,
     getFotosByLugar,
-    getLugarByID,
+    getFotos,
     getDatosHistoricos,
     getHorariosLugar,
     getCategorias,

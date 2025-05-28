@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import { 
   View, 
@@ -10,50 +10,138 @@ import {
   Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { listarColeccionables, listarFotos } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 const ITEM_WIDTH = (width - 48) / 3; 
 
+// Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
+const imageMap = {
+  'collect/basilica.png': require('../assets/images/collect/basilica.png'),
+  'collect/chirripo.png': require('../assets/images/collect/chirripo.png'),
+  'collect/corcovado.png': require('../assets/images/collect/corcovado.png'),
+  'collect/edificio-metalico.png': require('../assets/images/collect/edificio-metalico.png'),
+  'collect/teatro-nacional.png': require('../assets/images/collect/teatro-nacional.png'),
+  'collect/fortin.png': require('../assets/images/collect/fortin.png'),
+  'collect/melico-salazar.png': require('../assets/images/collect/melico-salazar.png'),
+  'collect/monteverde.png': require('../assets/images/collect/monteverde.png'),
+  'collect/ruinas-ujarras.png': require('../assets/images/collect/ruinas-ujarras.png'),
+  'collect/rio-celeste.png': require('../assets/images/collect/rio-celeste.png'),
+};
 
-// Componente Coleccionable individual
-const ColeccionableItem = ({ coleccionable, onPress }) => (
-  <TouchableOpacity 
-    style={[styles.coleccionableItem, { width: ITEM_WIDTH }]} 
-    onPress={() => onPress(coleccionable)}
-  >
-    <View style={styles.coleccionablePlaceholder}>
-      {/* Placeholder con formas geométricas */}
-      <View style={styles.triangle} />
-      <View style={styles.square} />
-      <View style={styles.circle} />
-    </View>
-    <Text style={styles.coleccionableTitle}>{coleccionable.nombre}</Text>
-  </TouchableOpacity>
-);
+// Función para obtener la imagen correcta del coleccionable
+const getColeccionableImage = (coleccionable, fotos) => {
+  // Si está desbloqueado, buscar la imagen correspondiente
+  if (coleccionable.desbloqueado) {
+    const fotoCorrespondiente = fotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
+    if (fotoCorrespondiente && imageMap[fotoCorrespondiente.ruta_imagen]) {
+      //console.log('Imagen encontrada para:', fotoCorrespondiente.ruta_imagen);
+      return { 
+        source: imageMap[fotoCorrespondiente.ruta_imagen], 
+        isDefault: false 
+      };
+    } else {
+      console.warn('Imagen no encontrada en el mapa para:', fotoCorrespondiente?.ruta_imagen);
+    }
+  }
+  
+  // Si no está desbloqueado o no se encontró la foto, usar imagen por defecto
+  return { 
+    source: require('../assets/images/fotos_predeterminadas/default.jpg'), 
+    isDefault: true 
+  };
+};
 
-const AlbumScreen = () => {
+// Componente Coleccionable individual actualizado
+const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
+  const imageInfo = getColeccionableImage(coleccionable, fotos);
+  
+  return (
+    <TouchableOpacity 
+      style={[styles.coleccionableItem, { width: ITEM_WIDTH }]} 
+      onPress={() => onPress(coleccionable)}
+    >
+      <View style={styles.coleccionableImageContainer}>
+        <Image 
+          source={imageInfo.source}
+          style={styles.coleccionableImage}
+          resizeMode="cover"
+          onError={(error) => {
+            console.log('Error cargando imagen:', error);
+          }}
+        />
+        
+        {/* Overlay para coleccionables no desbloqueados */}
+        {!coleccionable.desbloqueado && (
+          <View style={styles.lockedOverlay}>
+            <FontAwesome name="lock" size={24} color="white" />
+          </View>
+        )}
+        
+        {/* Indicador de desbloqueado */}
+        {coleccionable.desbloqueado && (
+          <View style={styles.unlockedIndicator}>
+            <FontAwesome name="check-circle" size={16} color="#4CAF50" />
+          </View>
+        )}
+      </View>
+      
+      <Text style={[
+        styles.coleccionableTitle,
+        !coleccionable.desbloqueado && styles.lockedTitle
+      ]}>
+        {coleccionable.nombre}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+const AlbumScreen = ({ user }) => {
   const [activeTab, setActiveTab] = useState('Todos');
+  const navigation = useNavigation();
+  const [coleccionables, setColeccionables] = useState([]);
+  const [loguedUser, setLoguedUser] = useState(null);
+  const [fotos, setFotos] = useState([]);
+  
+  useEffect(() => {
+    const fetchColeccionables = async () => {
+      try {
+        //console.log('Usuario en AlbumScreen:', user);
 
-  // Datos simulados de coleccionables (más elementos para probar el scroll)
-  const coleccionables = Array(24).fill(null).map((_, index) => ({
-    id: index + 1,
-    nombre: `Título ${index + 1}`,
-    imagen: null,
-    coleccionado: Math.random() > 0.5,
-    categoria: 'MiAlbum1'
-  }));
+        const dataColectibles = await listarColeccionables(user.id);
+        setColeccionables(dataColectibles);
+
+        const dataFotos = await listarFotos();
+        setFotos(dataFotos);
+        //console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
+        
+        // Log para verificar la relación entre coleccionables y fotos
+        dataColectibles.forEach(coleccionable => {
+          const fotoCorrespondiente = dataFotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
+          //console.log(`Coleccionable: ${coleccionable.nombre}, Lugar: ${coleccionable.id_lugar}, Foto encontrada:`, fotoCorrespondiente?.ruta_imagen || 'No encontrada');
+        });
+        
+      } catch (error) {
+        console.error('Error al obtener coleccionables:', error);
+      }
+    };
+    fetchColeccionables();
+  }, []);
 
   const filteredColeccionables = activeTab === 'Coleccionados' 
-    ? coleccionables.filter(item => item.coleccionado)
+    ? coleccionables.filter(item => item.desbloqueado)
     : coleccionables;
 
   const handleColeccionablePress = (coleccionable) => {
-    console.log('Coleccionable seleccionado:', coleccionable);
+    //TODO> Implementar navegación a detalle del coleccionable
   };
 
   const renderColeccionable = ({ item }) => (
     <ColeccionableItem 
       coleccionable={item} 
+      fotos={fotos}
       onPress={handleColeccionablePress}
     />
   );
@@ -68,7 +156,7 @@ const AlbumScreen = () => {
           {/* Logo y título a la izquierda */}
           <View style={styles.headerLeft}>
             <Image 
-              source={require('../assets/images/LogoXVerde.png')} 
+              source={require('../assets/images/logo/LogoXVerde.png')} 
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -98,7 +186,6 @@ const AlbumScreen = () => {
         </View>
       </View>
 
-
       {/* Sección de orden */}
       <View style={styles.orderSection}>
         <View style={styles.orderLeft}>
@@ -114,7 +201,7 @@ const AlbumScreen = () => {
       <FlatList
         data={filteredColeccionables}
         renderItem={renderColeccionable}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id_coleccionable.toString()}
         numColumns={3}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}
@@ -125,7 +212,7 @@ const AlbumScreen = () => {
         windowSize={10}
         initialNumToRender={12}
         getItemLayout={(data, index) => ({
-          length: ITEM_WIDTH + 40, // altura del item + margin
+          length: ITEM_WIDTH + 40,
           offset: (ITEM_WIDTH + 40) * Math.floor(index / 3),
           index,
         })}
@@ -225,49 +312,58 @@ const styles = StyleSheet.create({
   coleccionableItem: {
     alignItems: 'center',
   },
-  coleccionablePlaceholder: {
+  coleccionableImageContainer: {
     width: '100%',
     aspectRatio: 1,
-    backgroundColor: '#D3D3D3',
     borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 8,
+    position: 'relative',
+    backgroundColor: '#E0E0E0',
+  },
+  coleccionableImage: {
+    width: '100%',
+    height: '100%',
+  },
+  lockedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-    marginBottom: 8,
   },
-  triangle: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 15,
-    borderRightWidth: 15,
-    borderBottomWidth: 20,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: '#999',
+  unlockedIndicator: {
     position: 'absolute',
-    top: 20,
-  },
-  square: {
-    width: 20,
-    height: 20,
-    backgroundColor: '#999',
-    position: 'absolute',
-    bottom: 25,
-    left: 25,
-  },
-  circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#999',
-    position: 'absolute',
-    bottom: 25,
-    right: 25,
+    top: 8,
+    right: 8,
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 2,
   },
   coleccionableTitle: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
+    fontWeight: '500',
+  },
+  lockedTitle: {
+    color: '#999',
+  },
+  // Eliminamos los estilos del placeholder ya que ya no los usamos
+  triangle: {
+    display: 'none',
+  },
+  square: {
+    display: 'none',
+  },
+  circle: {
+    display: 'none',
+  },
+  coleccionablePlaceholder: {
+    display: 'none',
   },
 });
 

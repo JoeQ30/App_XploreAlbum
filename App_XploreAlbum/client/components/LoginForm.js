@@ -3,7 +3,7 @@ import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
 
-const logo = require('../assets/images/Letter1-F_Verde.png');
+const logo = require('../assets/images/logo/Letter1-F_Verde.png');
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState('');
@@ -16,7 +16,8 @@ export default function LoginForm() {
       const userData = await login(correo, contraseña);
       console.log(correo, contraseña);
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
-      navigation.navigate('Navigator');
+      console.log('[LOGIN] Datos del usuario:', userData);
+      navigation.navigate('Navigator', { user: userData });
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Credenciales inválidas');
