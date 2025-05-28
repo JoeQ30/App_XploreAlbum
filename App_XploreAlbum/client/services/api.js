@@ -65,7 +65,7 @@ export const listarUsuarios = async () => {
 export const listarColeccionables = async (id) => {
   try {
     const response = await api.get(`/users/${id}/collectibles`);
-    console.log('[Collectibles]\nColeccionables obtenidos:\n', response.data);
+    //console.log('[Collectibles]\nColeccionables obtenidos:\n', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al listar coleccionables:', error);
@@ -76,7 +76,7 @@ export const listarColeccionables = async (id) => {
 export const listarFotos = async () => {
   try {
     const response = await api.get(`/photos`);
-    console.log('[Photos]\nFotos obtenidas:\n', response.data);
+    //console.log('[Photos]\nFotos obtenidas:\n', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al listar fotos:', error);

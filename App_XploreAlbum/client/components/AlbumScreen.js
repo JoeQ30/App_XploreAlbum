@@ -37,7 +37,7 @@ const getColeccionableImage = (coleccionable, fotos) => {
   if (coleccionable.desbloqueado) {
     const fotoCorrespondiente = fotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
     if (fotoCorrespondiente && imageMap[fotoCorrespondiente.ruta_imagen]) {
-      console.log('Imagen encontrada para:', fotoCorrespondiente.ruta_imagen);
+      //console.log('Imagen encontrada para:', fotoCorrespondiente.ruta_imagen);
       return { 
         source: imageMap[fotoCorrespondiente.ruta_imagen], 
         isDefault: false 
@@ -108,19 +108,19 @@ const AlbumScreen = ({ user }) => {
   useEffect(() => {
     const fetchColeccionables = async () => {
       try {
-        console.log('Usuario en AlbumScreen:', user);
+        //console.log('Usuario en AlbumScreen:', user);
 
         const dataColectibles = await listarColeccionables(user.id);
         setColeccionables(dataColectibles);
 
         const dataFotos = await listarFotos();
         setFotos(dataFotos);
-        console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
+        //console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
         
         // Log para verificar la relación entre coleccionables y fotos
         dataColectibles.forEach(coleccionable => {
           const fotoCorrespondiente = dataFotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
-          console.log(`Coleccionable: ${coleccionable.nombre}, Lugar: ${coleccionable.id_lugar}, Foto encontrada:`, fotoCorrespondiente?.ruta_imagen || 'No encontrada');
+          //console.log(`Coleccionable: ${coleccionable.nombre}, Lugar: ${coleccionable.id_lugar}, Foto encontrada:`, fotoCorrespondiente?.ruta_imagen || 'No encontrada');
         });
         
       } catch (error) {
@@ -135,7 +135,7 @@ const AlbumScreen = ({ user }) => {
     : coleccionables;
 
   const handleColeccionablePress = (coleccionable) => {
-    console.log('Coleccionable seleccionado:', coleccionable);
+    //TODO> Implementar navegación a detalle del coleccionable
   };
 
   const renderColeccionable = ({ item }) => (
