@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.7.241:3000'; 
-//const API_BASE_URL = 'http://192.168.56.1:3000'; 
+//const API_BASE_URL = 'http://192.168.7.241:3000'; 
+const API_BASE_URL = 'http://192.168.1.28:3000';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
@@ -36,6 +37,7 @@ export const login = async (thisEmail, thisPassword) => {
     return usuario;
 
   } catch (error) {
+    console.log('error: ', error);
     throw new Error('Credenciales inválidas o error del servidor');
   }
 };

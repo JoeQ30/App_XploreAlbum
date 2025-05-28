@@ -133,10 +133,12 @@ const getUsuarioByNombre = async (name) => {
 };
 
 const getUsuarioByCorreo = async (email) => {
+    console.log('Buscando usuario por correo:', email);
     const res = await db.query(
         'SELECT * FROM usuarios WHERE correo LIKE $1 AND activo = TRUE;',
         [email]
     );
+    console.log('Resultado de la búsqueda:', res.rows);
     return res.rows[0];
 };
 
