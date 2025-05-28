@@ -22,7 +22,7 @@ export const login = async (thisEmail, thisPassword) => {
       throw new Error('Por favor, ingresa tu correo y contraseña');
     }
 
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+    const response = await api.post('/auth/login', {
       email: thisEmail,
       password: thisPassword,
     });
@@ -58,6 +58,28 @@ export const listarUsuarios = async () => {
     return response.data;
   } catch (error) {
     console.error('Error al listar usuarios:', error);
+    throw error;
+  }
+};
+
+export const listarColeccionables = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/collectibles`);
+    console.log('[Collectibles]\nColeccionables obtenidos:\n', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar coleccionables:', error);
+    throw error;
+  }
+};
+
+export const listarFotos = async () => {
+  try {
+    const response = await api.get(`/photos`);
+    console.log('[Photos]\nFotos obtenidas:\n', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar fotos:', error);
     throw error;
   }
 };

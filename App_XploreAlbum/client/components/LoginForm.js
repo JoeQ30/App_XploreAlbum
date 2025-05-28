@@ -16,7 +16,8 @@ export default function LoginForm() {
       const userData = await login(correo, contraseña);
       console.log(correo, contraseña);
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
-      navigation.navigate('Navigator');
+      console.log('[LOGIN] Datos del usuario:', userData);
+      navigation.navigate('Navigator', { user: userData });
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Credenciales inválidas');

@@ -30,10 +30,9 @@ const remove = async (req, res, next) => {
     }
 };
 
-const getByUser = async (req, res, next) => {
+const listar = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const fotos = await db.getFotosByUsuario(id);
+        const fotos = await db.getFotos();
         return res.json(fotos);
     } catch (error) {
         next(error);
@@ -50,4 +49,4 @@ const getByPlace = async (req, res, next) => {
     }
 };
 
-module.exports = { upload, get, remove, getByUser, getByPlace };
+module.exports = { upload, get, remove, listar, getByPlace };
