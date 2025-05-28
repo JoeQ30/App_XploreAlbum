@@ -90,6 +90,9 @@ export const sendImageToBackend = async (imageUri) => {
     return response.data;
   } catch (error) {
     console.error('Error al enviar imagen al backend:', error.response?.data || error.message);
+    throw new Error('Error al enviar imagen al backend');
+  }
+};
 
 export const listarColeccionables = async (id) => {
   try {
