@@ -24,8 +24,7 @@ const registerUser = async (req, res, next) => {
 
         return res.status(200).json(usuario);
     } catch (error) {
-        console.error("Error en registerUser:", error); // Log the full error
-        res.status(500).json({ error: error.message }); // Send the actual error message
+        next(error);
     }
 };
 
