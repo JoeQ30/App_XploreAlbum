@@ -36,6 +36,26 @@ const listarColeccionables = async () => {
     return res.rows;
 };
 
+const ListarLogrosById = async (id) => {
+    const res = await db.query(`
+      SELECT 
+          l.id_logro,
+          l.nombre,
+          l.descripcion,
+          l.puntos,
+          l.criterio,
+          l.icono,
+          COALESCE(pl.completado, false) AS completado
+      FROM logros l
+      LEFT JOIN progreso_logros pl 
+        ON l.id_logro = pl.id_logro AND pl.id_usuario = $1
+      ORDER BY l.id_logro;
+    `, [id]);
+
+    return res.rows;
+};
+
+
 const insertarUsuario = async (nombre, email, password, foto_perfil, biografia) => {
     console.log({ nombre, email, password, foto_perfil, biografia });
     const res = await db.query(
@@ -113,12 +133,24 @@ const getUsuarioByNombre = async (name) => {
 };
 
 const getUsuarioByCorreo = async (email) => {
+    console.log('Buscando usuario por correo:', email);
     const res = await db.query(
         'SELECT * FROM usuarios WHERE correo LIKE $1 AND activo = TRUE;',
         [email]
     );
+    console.log('Resultado de la búsqueda:', res.rows);
     return res.rows[0];
 };
+
+const setUltimaConexion = async (id) => {
+  const res = await db.query(
+    'UPDATE usuarios SET ultima_conexion = CURRENT_DATE WHERE id_usuario = $1 RETURNING *',
+    [id]
+  );
+
+  return res.rows[0];
+}
+
 
 const updateUsuario = async (id, nombre, email, foto_perfil, biografia, visibilidad_perfil) => {
     const res = await db.query(
@@ -390,6 +422,8 @@ module.exports = {
     getDatosHistoricos,
     getHorariosLugar,
     getCategorias,
-    db
+    setUltimaConexion,
+    ListarLogrosById,
+    db,
 };
 
