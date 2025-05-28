@@ -80,7 +80,7 @@ const SplashScreen = ({ onLoadingComplete }) => {
         {/* Logo de XploreAlbum */}
         <View style={styles.logo}>
           <Image 
-            source={require('../assets/images/LogoPrincipal-F_Blanco.png')} 
+            source={require('../assets/images/logo/LogoPrincipal-F_Blanco.png')} 
             style={{ width: 100, height: 100 }} 
             resizeMode="contain"
           />

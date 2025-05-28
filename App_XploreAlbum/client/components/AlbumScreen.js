@@ -68,7 +68,7 @@ const AlbumScreen = () => {
           {/* Logo y título a la izquierda */}
           <View style={styles.headerLeft}>
             <Image 
-              source={require('../assets/images/LogoXVerde.png')} 
+              source={require('../assets/images/logo/LogoXVerde.png')} 
               style={styles.logoImage}
               resizeMode="contain"
             />

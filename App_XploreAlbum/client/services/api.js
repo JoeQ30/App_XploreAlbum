@@ -27,7 +27,7 @@ export const login = async (thisEmail, thisPassword) => {
       password: thisPassword,
     });
 
-    console.log('Respuesta del servidor:', response.data);
+    //console.log('Respuesta del servidor:', response.data);
 
     const { token, usuario } = response.data;
 

@@ -65,7 +65,7 @@ const ProfileScreen = () => {
         <View style={styles.logoContainer}>
           <Text style={styles.logoX}>
             <Image 
-            source={require('../assets/images/LogoXVerde.png')} 
+            source={require('../assets/images/logo/LogoXVerde.png')} 
             style={styles.logoImage}
             resizeMode="contain"
             />

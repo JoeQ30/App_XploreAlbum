@@ -142,7 +142,7 @@ const NotificationsScreen = () => {
         
         <View style={styles.headerContent}>
           <Image
-            source={require('../assets/images/LogoXVerde.png')}
+            source={require('../assets/images/logo/LogoXVerde.png')}
             style={{ width: 40, height: 40 }}
             resizeMode="contain"
           />

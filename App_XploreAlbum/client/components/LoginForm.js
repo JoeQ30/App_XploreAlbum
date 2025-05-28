@@ -3,7 +3,7 @@ import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
 
-const logo = require('../assets/images/Letter1-F_Verde.png');
+const logo = require('../assets/images/logo/Letter1-F_Verde.png');
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState('');
