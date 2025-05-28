@@ -30,62 +30,87 @@ const predictLandmark = async (req, res, next) => {
       });
     }
 
-    // 3. Registrar foto en la base de datos (si el usuario está autenticado)
-    let fotoData = null;
-    if (req.user) {
-      // Guardar imagen en el sistema de archivos
-      const uploadDir = path.join(__dirname, '../../uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+    // 3. Preparar respuesta básica
+    const responseData = {
+      success: true,
+      lugar: lugar.rows[0],
+      prediction: prediction.bestPrediction,
+      foto: null,
+      nuevosColeccionables: []
+    };
 
-      const filename = `${uuidv4()}.jpg`;
-      const filepath = path.join(uploadDir, filename);
-      fs.writeFileSync(filepath, req.file.buffer);
+    res.json(responseData);
 
-      // Insertar en base de datos
-      const fotoInsert = await db.db.query(
-        `INSERT INTO fotos (
-          ruta_imagen,
-          id_usuario,
-          id_lugar,
-          id_estado,
-          fecha_subida
-        ) VALUES ($1, $2, $3, 1, NOW()) RETURNING *`,
-        [filename, req.user.id_usuario, lugar.rows[0].id_lugar]
-      );
+  } catch (error) {
+    next(error);
+  }
+};
 
-      fotoData = fotoInsert.rows[0];
+const saveCollection = async (req, res, next) => {
+  try {
+    const { lugarId, imageBase64 } = req.body;
+    
+    if (!req.user) {
+      return res.status(401).json({ error: 'Usuario no autenticado' });
     }
 
-    // 4. Verificar si hay coleccionables para desbloquear (si el usuario está autenticado)
-    let coleccionablesDesbloqueados = [];
-    if (req.user) {
-      const coleccionables = await db.db.query(
-        `SELECT c.* FROM coleccionables c
-         LEFT JOIN usuario_coleccionables uc ON c.id_coleccionable = uc.id_coleccionable AND uc.id_usuario = $1
-         WHERE c.id_lugar = $2 AND uc.id_usuario IS NULL`,
-        [req.user.id_usuario, lugar.rows[0].id_lugar]
-      );
+    // 1. Buscar lugar en la base de datos
+    const lugar = await db.db.query(
+      'SELECT * FROM lugares WHERE id_lugar = $1',
+      [lugarId]
+    );
 
-      if (coleccionables.rows.length > 0) {
-        // Insertar todos los coleccionables no desbloqueados
-        for (const coleccionable of coleccionables.rows) {
-          await db.db.query(
-            `INSERT INTO usuario_coleccionables (id_usuario, id_coleccionable, fecha_desbloqueo)
-             VALUES ($1, $2, NOW())`,
-            [req.user.id_usuario, coleccionable.id_coleccionable]
-          );
-        }
-        coleccionablesDesbloqueados = coleccionables.rows;
+    if (!lugar.rows[0]) {
+      return res.status(404).json({ error: 'Lugar no encontrado' });
+    }
+
+    // 2. Guardar imagen en el sistema de archivos
+    const uploadDir = path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    const filename = `${uuidv4()}.jpg`;
+    const filepath = path.join(uploadDir, filename);
+    const imageBuffer = Buffer.from(imageBase64, 'base64');
+    fs.writeFileSync(filepath, imageBuffer);
+
+    // 3. Insertar en base de datos
+    const fotoInsert = await db.db.query(
+      `INSERT INTO fotos (
+        ruta_imagen,
+        id_usuario,
+        id_lugar,
+        id_estado,
+        fecha_subida,
+        propuesta_album_oficial
+      ) VALUES ($1, $2, $3, 1, NOW(), TRUE) RETURNING *`,
+      [filename, req.user.id_usuario, lugar.rows[0].id_lugar]
+    );
+
+    // 4. Verificar y desbloquear coleccionables
+    let coleccionablesDesbloqueados = [];
+    const coleccionables = await db.db.query(
+      `SELECT c.* FROM coleccionables c
+       LEFT JOIN usuario_coleccionables uc ON c.id_coleccionable = uc.id_coleccionable AND uc.id_usuario = $1
+       WHERE c.id_lugar = $2 AND uc.id_usuario IS NULL`,
+      [req.user.id_usuario, lugar.rows[0].id_lugar]
+    );
+
+    if (coleccionables.rows.length > 0) {
+      for (const coleccionable of coleccionables.rows) {
+        await db.db.query(
+          `INSERT INTO usuario_coleccionables (id_usuario, id_coleccionable, fecha_desbloqueo)
+           VALUES ($1, $2, NOW())`,
+          [req.user.id_usuario, coleccionable.id_coleccionable]
+        );
       }
+      coleccionablesDesbloqueados = coleccionables.rows;
     }
 
     res.json({
       success: true,
-      lugar: lugar.rows[0],
-      prediction: prediction.bestPrediction,
-      foto: fotoData,
+      foto: fotoInsert.rows[0],
       nuevosColeccionables: coleccionablesDesbloqueados
     });
 
@@ -110,19 +135,16 @@ const getLandmarkInfo = async (req, res, next) => {
       return res.status(404).json({ error: 'Lugar no encontrado' });
     }
 
-    // Obtener horarios
     const horarios = await db.db.query(
       'SELECT * FROM horarios_lugar WHERE id_lugar = $1 ORDER BY dia_semana',
       [id]
     );
 
-    // Obtener datos históricos
     const datosHistoricos = await db.db.query(
       'SELECT * FROM datos_historicos_lugar WHERE id_lugar = $1',
       [id]
     );
 
-    // Obtener fotos (opcional)
     const fotos = await db.db.query(
       `SELECT f.*, u.nombre as usuario_nombre 
        FROM fotos f
@@ -147,5 +169,6 @@ const getLandmarkInfo = async (req, res, next) => {
 
 module.exports = {
   predictLandmark,
+  saveCollection,
   getLandmarkInfo
 };

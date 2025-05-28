@@ -37,7 +37,8 @@
         "foregroundImage": "./assets/images/logo/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": ["INTERNET"]
     }
   }
 }

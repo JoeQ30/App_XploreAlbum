@@ -1,8 +1,11 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
-const API_BASE_URL = 'http://192.168.7.241:3000'; 
-//const API_BASE_URL = 'http://192.168.56.1:3000'; 
+//const API_BASE_URL = 'http://192.168.7.241:3000'; 
+const API_BASE_URL = 'http://192.168.1.28:3000';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -36,6 +39,7 @@ export const login = async (thisEmail, thisPassword) => {
     return usuario;
 
   } catch (error) {
+    console.log('error: ', error);
     throw new Error('Credenciales inválidas o error del servidor');
   }
 };
@@ -61,6 +65,31 @@ export const listarUsuarios = async () => {
     throw error;
   }
 };
+
+
+export const sendImageToBackend = async (imageUri) => {
+  const formData = new FormData();
+
+  // Extrae el nombre del archivo desde la URI (puedes ajustar esto según tu librería de imágenes)
+  const filename = imageUri.split('/').pop();
+  const fileType = filename.split('.').pop();
+
+  formData.append('image', {
+    uri: Platform.OS === 'android' ? imageUri : imageUri.replace('file://', ''),
+    name: filename,
+    type: `image/${fileType}`
+  });
+
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/ia/recognize`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Error al enviar imagen al backend:', error.response?.data || error.message);
 
 export const listarColeccionables = async (id) => {
   try {

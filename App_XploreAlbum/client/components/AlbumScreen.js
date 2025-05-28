@@ -151,7 +151,7 @@ const AlbumScreen = ({ user }) => {
   return (
     <View style={styles.container}>
       {/* Header de la pantalla principal */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 30}]}>
         <View style={styles.headerContent}>
           {/* Logo y título a la izquierda */}
           <View style={styles.headerLeft}>

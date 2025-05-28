@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 
+
 const iaController = require('../controllers/iaController');
 
-// Configuración de Multer para manejar la carga de imágenes
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -19,10 +19,13 @@ const upload = multer({
   }
 });
 
-// Ruta para reconocimiento de imágenes
+// Reconocimiento de imagen
 router.post('/recognize', upload.single('image'), iaController.predictLandmark);
 
-// Ruta para obtener información detallada de un lugar
+// Guardar coleccionable
+router.post('/save-collection', iaController.saveCollection);
+
+// Información de lugar
 router.get('/landmark/:id', iaController.getLandmarkInfo);
 
 module.exports = router;
