@@ -1,14 +1,22 @@
-const db = require('../db'); 
+const db = require('../db');
 
 const list = async (req, res, next) => {
     try {
-        const coleccionables = await db.listarColeccionables(); 
+        const coleccionables = await db.listarColeccionables();
         return res.json(coleccionables);
     } catch (error) {
         next(error);
     }
-}
-
-module.exports = {
-    list,
 };
+
+const getByUser = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const items = await db.getColeccionablesByUsuario(id);
+        return res.json(items);
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { list, getByUser };
