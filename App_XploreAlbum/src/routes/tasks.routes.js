@@ -21,6 +21,8 @@ const iaRoutes = require('./iaRoutes');
 // -------- IA y Reconocimiento de Imágenes --------
 router.use('/ai', iaRoutes);
 
+
+
 // -------- Autenticación --------
 router.post('/auth/register_user', authController.registerUser);
 router.post('/auth/register_admin', authController.registerAdmin);

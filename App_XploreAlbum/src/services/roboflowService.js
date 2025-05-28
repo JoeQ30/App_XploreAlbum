@@ -15,31 +15,21 @@ class RoboflowService {
   }
 
   async predictFromBuffer(imageBuffer) {
-    try {
-      const formData = new FormData();
-      formData.append('file', imageBuffer, { 
-        filename: 'image.jpg',
-        contentType: 'image/jpeg'
-      });
-
-      const response = await axios.post(this.baseUrl, formData, {
-        params: {
-          api_key: this.apiKey,
-          confidence: 40,
-          overlap: 30
-        },
-        headers: {
-          ...formData.getHeaders(),
-          'Accept': 'application/json'
-        }
-      });
-
-      return this.processPredictions(response.data);
-    } catch (error) {
-      console.error('Error calling Roboflow API:', error);
-      throw new Error('Error processing image with AI');
-    }
+  try {
+    const base64Image = imageBuffer.toString('base64');
+    const response = await axios.post(
+      `${this.baseUrl}?api_key=${this.apiKey}`,
+      { image: base64Image },
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      }
+    );
+    return this.processPredictions(response.data);
+  } catch (error) {
+    console.error('Error calling Roboflow API:', error.response?.data || error.message);
+    throw error;
   }
+}
 
   async predictFromUri(imageUri) {
     try {
@@ -60,7 +50,7 @@ class RoboflowService {
 
       return this.processPredictions(response.data);
     } catch (error) {
-      console.error('Error calling Roboflow API:', error);
+      console.log('Error completo:', error.response?.data || error.message);
       throw new Error('Error processing image with AI');
     }
   }
@@ -73,7 +63,6 @@ class RoboflowService {
       };
     }
 
-    // Ordenar predicciones por confianza (mayor primero)
     const sortedPredictions = [...predictions.predictions].sort((a, b) => b.confidence - a.confidence);
     const bestPrediction = sortedPredictions[0];
 
