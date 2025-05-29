@@ -47,52 +47,116 @@ const FriendsScreen = () => {
     console.log('Agregando amigo:', friendId);
   };
 
+  const filteredUsers = users
+    .filter((u) => u.id_usuario !== loguedUser?.id)
+    .filter((u) => 
+      searchText === '' || 
+      u.nombre.toLowerCase().includes(searchText.toLowerCase())
+    );
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView 
+      style={styles.container}
+      accessible={true}
+      accessibilityLabel="Pantalla de amigos"
+    >
       <StatusBar backgroundColor="#4A4A4A" barStyle="light-content" />
       
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top }]}
+        accessible={true}
+        accessibilityRole="header"
+        accessibilityLabel="Encabezado de la aplicación"
+      >
         <View style={styles.logoContainer}>
-          <Text style={styles.logoX}>
-            <Image 
+          <Image 
             source={require('../assets/images/logo/LogoXVerde.png')} 
             style={styles.logoImage}
             resizeMode="contain"
-            />
+            accessible={true}
+            accessibilityLabel="Logo de la aplicación XploreAlbum"
+            accessibilityRole="image"
+          />
+          <Text 
+            style={styles.logoText}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel="Título de la sección: Amigos"
+          >
+            Amigos
           </Text>
-          <Text style={styles.logoText}>Amigos</Text>
         </View>
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
+      <View 
+        style={styles.searchContainer}
+        accessible={true}
+        accessibilityLabel="Barra de búsqueda de usuarios"
+        accessibilityRole="search"
+      >
+        <Icon 
+          name="search" 
+          size={20} 
+          color="#666" 
+          style={styles.searchIcon}
+          accessible={false}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar Usuario"
           value={searchText}
           onChangeText={setSearchText}
+          accessible={true}
+          accessibilityLabel="Campo de búsqueda de usuarios"
+          accessibilityHint="Escribe el nombre del usuario que deseas buscar"
+          returnKeyType="search"
+          clearButtonMode="while-editing"
         />
       </View>
 
       {/* Users List */}
-      <ScrollView style={styles.friendsList} showsVerticalScrollIndicator={false}>
-        {users
-          .filter((u) => u.id_usuario !== loguedUser.id)
-          .map((u) => (
+      <ScrollView 
+        style={styles.friendsList} 
+        showsVerticalScrollIndicator={false}
+        accessible={true}
+        accessibilityLabel={`Lista de usuarios disponibles. ${filteredUsers.length} usuarios encontrados`}
+        accessibilityRole="list"
+      >
+        {filteredUsers.length === 0 ? (
+          <View 
+            style={styles.emptyContainer}
+            accessible={true}
+            accessibilityLabel="No se encontraron usuarios"
+            accessibilityRole="text"
+          >
+            <Text style={styles.emptyText}>
+              {searchText ? 'No se encontraron usuarios con ese nombre' : 'No hay usuarios disponibles'}
+            </Text>
+          </View>
+        ) : (
+          filteredUsers.map((u, index) => (
             <TouchableOpacity 
               key={u.id_usuario}
               onPress={() => navigation.navigate('Profile', { user: u })}
-          >
-          <FriendItem
-            key={u.id_usuario}
-            name={u.nombre}
-            location={u.ubicacion}
-            onAddPress={() => handleAddFriend(u.id_usuario)}
-          />
-          </TouchableOpacity>
-        ))}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver perfil de ${u.nombre}, ubicado en ${u.ubicacion || 'ubicación no especificada'}`}
+              accessibilityHint="Toca para ver el perfil completo de este usuario"
+              accessibilityState={{ selected: false }}
+            >
+              <FriendItem
+                key={u.id_usuario}
+                name={u.nombre}
+                location={u.ubicacion}
+                onAddPress={() => handleAddFriend(u.id_usuario)}
+                accessible={true}
+                accessibilityLabel={`Usuario ${index + 1} de ${filteredUsers.length}: ${u.nombre}`}
+              />
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -112,12 +176,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 40,
-  },
-  logoX: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8BC34A',
-    marginRight: 8,
   },
   logoText: {
     fontSize: 25,
@@ -154,6 +212,18 @@ const styles = StyleSheet.create({
   },
   friendsList: {
     flex: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   bottomTabBar: {
     flexDirection: 'row',

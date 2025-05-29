@@ -44,91 +44,263 @@ const UserProfile = () => {
     },
   ];
 
+  const memberSince = user?.fecha_registro?.slice(0, 4) || 'Año no disponible';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView 
+      style={styles.container}
+      accessible={true}
+      accessibilityLabel={`Perfil de usuario de ${user?.nombre || 'Usuario desconocido'}`}
+    >
       <StatusBar backgroundColor="#4A4A4A" barStyle="light-content" />
       
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top }]}
+        accessible={true}
+        accessibilityRole="header"
+        accessibilityLabel="Barra de navegación del perfil"
+      >
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Volver atrás"
+          accessibilityHint="Toca para regresar a la pantalla anterior"
+        >
           <Icon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         
         <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Perfil de Usuario</Text>
+          <Text 
+            style={styles.logoText}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel="Título de la pantalla: Perfil de Usuario"
+          >
+            Perfil de Usuario
+          </Text>
         </View>
         
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity 
+            style={styles.headerIcon}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Más opciones"
+            accessibilityHint="Toca para ver más opciones del perfil"
+          >
             <Icon name="more-vert" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        accessible={true}
+        accessibilityLabel="Contenido del perfil de usuario"
+        accessibilityRole="scrollbar"
+      >
         {/* Profile Avatar */}
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Icon name="person" size={60} color="#666" />
+        <View 
+          style={styles.avatarContainer}
+          accessible={true}
+          accessibilityLabel={`Información básica de ${user?.nombre || 'Usuario'}`}
+          accessibilityRole="summary"
+        >
+          <View 
+            style={styles.avatar}
+            accessible={true}
+            accessibilityLabel={`Foto de perfil de ${user?.nombre || 'Usuario'}`}
+            accessibilityRole="image"
+          >
+            <Icon 
+              name="person" 
+              size={60} 
+              color="#666"
+              accessible={false}
+            />
           </View>
-          <Text style={styles.userName}>{user?.nombre || 'Usuario'}</Text>
-          <Text style={styles.userLocation}>{user?.ubicacion || 'Ubicación no especificada'}</Text>
+          <Text 
+            style={styles.userName}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Nombre de usuario: ${user?.nombre || 'Usuario'}`}
+          >
+            {user?.nombre || 'Usuario'}
+          </Text>
+          <Text 
+            style={styles.userLocation}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Ubicación: ${user?.ubicacion || 'Ubicación no especificada'}`}
+          >
+            {user?.ubicacion || 'Ubicación no especificada'}
+          </Text>
         </View>
 
         {/* Información del usuario */}
-        <View style={styles.profileForm}>
-          <View style={styles.infoRow}>
-            <Icon name="email" size={20} color="#666" style={styles.infoIcon} />
-            <Text style={styles.infoText}>{user?.correo || 'Correo no disponible'}</Text>
+        <View 
+          style={styles.profileForm}
+          accessible={true}
+          accessibilityLabel="Información detallada del usuario"
+          accessibilityRole="group"
+        >
+          <View 
+            style={styles.infoRow}
+            accessible={true}
+            accessibilityLabel={`Correo electrónico: ${user?.correo || 'Correo no disponible'}`}
+            accessibilityRole="text"
+          >
+            <Icon 
+              name="email" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
+            <Text style={styles.infoText}>
+              {user?.correo || 'Correo no disponible'}
+            </Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Icon name="info" size={20} color="#666" style={styles.infoIcon} />
+          <View 
+            style={styles.infoRow}
+            accessible={true}
+            accessibilityLabel={`Biografía: ${user?.biografia || 'Este usuario no ha agregado una biografía'}`}
+            accessibilityRole="text"
+          >
+            <Icon 
+              name="info" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
             <Text style={styles.infoText}>
               {user?.biografia || 'Este usuario no ha agregado una biografía'}
             </Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Icon name="calendar-today" size={20} color="#666" style={styles.infoIcon} />
+          <View 
+            style={styles.infoRow}
+            accessible={true}
+            accessibilityLabel={`Miembro desde el año ${memberSince}`}
+            accessibilityRole="text"
+          >
+            <Icon 
+              name="calendar-today" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
             <Text style={styles.infoText}>
-              Miembro desde: {user?.fecha_registro?.slice(0, 4) || 'Año no disponible'}
+              Miembro desde: {memberSince}
             </Text>
           </View>
         </View>
 
         {/* Achievements Section */}
-        <View style={styles.section}>
+        <View 
+          style={styles.section}
+          accessible={true}
+          accessibilityLabel="Sección de logros del usuario"
+          accessibilityRole="group"
+        >
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Logros 🏆</Text>
+            <Text 
+              style={styles.sectionTitle}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLabel="Logros obtenidos"
+            >
+              Logros 🏆
+            </Text>
           </View>
-          <View style={styles.achievementsContainer}>
-            {achievements.map((achievement) => (
-              <AchievementItem
+          <View 
+            style={styles.achievementsContainer}
+            accessible={true}
+            accessibilityLabel={`Lista de logros: ${achievements.length} logros disponibles`}
+            accessibilityRole="list"
+          >
+            {achievements.map((achievement, index) => (
+              <View
                 key={achievement.id}
-                icon={achievement.icon}
-                title={achievement.title}
-                description={achievement.description}
-                iconBg={achievement.iconBg}
-              />
+                accessible={true}
+                accessibilityLabel={`Logro ${index + 1} de ${achievements.length}: ${achievement.title}. ${achievement.description}`}
+                accessibilityRole="listitem"
+              >
+                <AchievementItem
+                  icon={achievement.icon}
+                  title={achievement.title}
+                  description={achievement.description}
+                  iconBg={achievement.iconBg}
+                />
+              </View>
             ))}
           </View>
         </View>
 
         {/* Statistics Section */}
-        <View style={styles.section}>
+        <View 
+          style={styles.section}
+          accessible={true}
+          accessibilityLabel="Sección de estadísticas del usuario"
+          accessibilityRole="group"
+        >
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Estadísticas</Text>
+            <Text 
+              style={styles.sectionTitle}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLabel="Estadísticas de progreso"
+            >
+              Estadísticas
+            </Text>
           </View>
-          <View style={styles.statisticsContainer}>
-            <View style={styles.statisticItem}>
-              <View style={styles.chartIcon}>
-                <Icon name="trending-up" size={30} color="#8BC34A" />
+          <View 
+            style={styles.statisticsContainer}
+            accessible={true}
+            accessibilityLabel="Información de estadísticas"
+            accessibilityRole="group"
+          >
+            <View 
+              style={styles.statisticItem}
+              accessible={true}
+              accessibilityLabel="Progreso de descubrimiento: Ha descubierto 16 de 30 lugares"
+              accessibilityRole="progressbar"
+              accessibilityValue={{ min: 0, max: 30, now: 16 }}
+            >
+              <View 
+                style={styles.chartIcon}
+                accessible={true}
+                accessibilityLabel="Icono de tendencia ascendente"
+                accessibilityRole="image"
+              >
+                <Icon 
+                  name="trending-up" 
+                  size={30} 
+                  color="#8BC34A"
+                  accessible={false}
+                />
               </View>
               <View style={styles.statisticInfo}>
-                <Text style={styles.statisticTitle}>Progreso</Text>
-                <Text style={styles.statisticDescription}>
+                <Text 
+                  style={styles.statisticTitle}
+                  accessible={true}
+                  accessibilityRole="text"
+                  accessibilityLabel="Título de estadística: Progreso"
+                >
+                  Progreso
+                </Text>
+                <Text 
+                  style={styles.statisticDescription}
+                  accessible={true}
+                  accessibilityRole="text"
+                  accessibilityLabel="Descripción: Ha descubierto 16 de 30 lugares disponibles"
+                >
                   Ha descubierto 16 de 30 lugares
                 </Text>
               </View>

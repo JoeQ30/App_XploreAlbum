@@ -13,31 +13,57 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// Iconos usando Material Icons
+// Iconos usando Material Icons con accesibilidad mejorada
 const BackIcon = () => (
-  <Icon name="arrow-back" size={24} color="white" />
+  <Icon 
+    name="arrow-back" 
+    size={24} 
+    color="white"
+    accessible={true}
+    accessibilityLabel="Icono de flecha hacia atrás"
+  />
 );
 
 const UserIcon = () => (
-  <View style={styles.userIcon}>
+  <View 
+    style={styles.userIcon}
+    accessible={true}
+    accessibilityLabel="Icono de usuario"
+    accessibilityRole="image"
+  >
     <Icon name="person" size={20} color="#4a5568" />
   </View>
 );
 
 const CheckIcon = () => (
-  <View style={styles.checkIcon}>
+  <View 
+    style={styles.checkIcon}
+    accessible={true}
+    accessibilityLabel="Icono de check para aceptar"
+    accessibilityRole="image"
+  >
     <Icon name="check" size={18} color="white" />
   </View>
 );
 
 const CloseIcon = () => (
-  <View style={styles.closeIcon}>
+  <View 
+    style={styles.closeIcon}
+    accessible={true}
+    accessibilityLabel="Icono de X para rechazar"
+    accessibilityRole="image"
+  >
     <Icon name="close" size={18} color="white" />
   </View>
 );
 
 const LandmarkIcon = () => (
-  <View style={styles.landmarkIcon}>
+  <View 
+    style={styles.landmarkIcon}
+    accessible={true}
+    accessibilityLabel="Icono de lugar de interés"
+    accessibilityRole="image"
+  >
     <Icon name="place" size={20} color="#d69e2e" />
   </View>
 );
@@ -94,27 +120,71 @@ const NotificationsScreen = () => {
     }
   };
 
-  const renderNotification = ({ item }) => (
-    <View style={styles.notificationItem}>
+  const getNotificationAccessibilityLabel = (item) => {
+    const baseMessage = item.user 
+      ? `${item.user} ${item.message}` 
+      : item.message;
+    
+    const typeDescription = item.type === 'friend_request' 
+      ? 'Solicitud de amistad' 
+      : 'Notificación de lugar de interés';
+    
+    return `${typeDescription}: ${baseMessage}. Fecha: ${item.date}`;
+  };
+
+  const renderNotification = ({ item, index }) => (
+    <View 
+      style={styles.notificationItem}
+      accessible={true}
+      accessibilityLabel={getNotificationAccessibilityLabel(item)}
+    >
       <View style={styles.notificationContent}>
         <View style={styles.iconContainer}>
           {renderIcon(item.icon)}
         </View>
         
         <View style={styles.textContainer}>
-          <Text style={styles.notificationText}>
-            {item.user && <Text style={styles.userName}>{item.user} </Text>}
+          <Text 
+            style={styles.notificationText}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={item.user ? `${item.user} ${item.message}` : item.message}
+          >
+            {item.user && (
+              <Text 
+                style={styles.userName}
+                accessible={true}
+                accessibilityLabel={`Usuario: ${item.user}`}
+              >
+                {item.user}{' '}
+              </Text>
+            )}
             {item.message}
           </Text>
-          <Text style={styles.dateText}>{item.date}</Text>
+          <Text 
+            style={styles.dateText}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Fecha: ${item.date}`}
+          >
+            {item.date}
+          </Text>
         </View>
       </View>
       
       {item.type === 'friend_request' && (
-        <View style={styles.actionsContainer}>
+        <View 
+          style={styles.actionsContainer}
+          accessible={true}  
+          accessibilityLabel="Acciones para la solicitud de amistad"
+        >
           <TouchableOpacity 
             style={styles.acceptButton}
             onPress={() => handleAccept(item.id)}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Aceptar solicitud de amistad de ${item.user}`}
+            accessibilityHint="Toca para aceptar la solicitud de amistad"
           >
             <CheckIcon />
           </TouchableOpacity>
@@ -122,6 +192,10 @@ const NotificationsScreen = () => {
           <TouchableOpacity 
             style={styles.rejectButton}
             onPress={() => handleReject(item.id)}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Rechazar solicitud de amistad de ${item.user}`}
+            accessibilityHint="Toca para rechazar la solicitud de amistad"
           >
             <CloseIcon />
           </TouchableOpacity>
@@ -132,34 +206,73 @@ const NotificationsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#4a5568" />
+      <StatusBar 
+        barStyle="light-content" 
+        backgroundColor="#4a5568"
+        accessible={true}
+        accessibilityLabel="Barra de estado con fondo gris oscuro"
+      />
       
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top }]}
+        accessible={true}
+        accessibilityRole="header"
+        accessibilityLabel="Encabezado de la pantalla de notificaciones"
+      >
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Volver a la pantalla anterior"
+          accessibilityHint="Toca para regresar"
+        >
           <BackIcon />
         </TouchableOpacity>
         
-        <View style={styles.headerContent}>
+        <View 
+          style={styles.headerContent}
+          accessible={true}
+          accessibilityRole="text"
+          accessibilityLabel="Logo de la aplicación y título de notificaciones"
+        >
           <Image
             source={require('../assets/images/logo/LogoXVerde.png')}
             style={{ width: 40, height: 40 }}
             resizeMode="contain"
+            accessible={true}
+            accessibilityLabel="Logo de la aplicación X en color verde"
+            accessibilityRole="image"
           />
-          <Text style={styles.headerTitle}>Notificaciones</Text>
+          <Text 
+            style={styles.headerTitle}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel="Título de la sección: Notificaciones"
+          >
+            Notificaciones
+          </Text>
         </View>
         
         <View style={styles.placeholder} />
       </View>
       
       {/* Lista de notificaciones */}
-      <View style={styles.content}>
+      <View 
+        style={styles.content}
+        accessible={true}
+        accessibilityLabel="Contenido principal con lista de notificaciones"
+      >
         <FlatList
           data={notifications}
           renderItem={renderNotification}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}
+          accessible={true}
+          accessibilityLabel={`Lista de notificaciones, ${notifications.length} elementos`}
+          accessibilityHint="Desliza para ver todas las notificaciones"
         />
       </View>
     </SafeAreaView>

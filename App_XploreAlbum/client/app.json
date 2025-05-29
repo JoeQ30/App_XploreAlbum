@@ -1,7 +1,10 @@
 {
   "expo": {
-    "name": "client",
+    "name": "XploreAlbum",
     "slug": "client",
+    "locales": {
+      "es": "./locales/es.json"
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo/icon.png",
@@ -30,13 +33,18 @@
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "es",
+        "CFBundleLocalizations": ["es"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "locales": ["es"],
       "edgeToEdgeEnabled": true,
       "permissions": ["INTERNET"]
     }

@@ -9,6 +9,7 @@ export default function LoginForm() {
   const [correo, setCorreo] = useState('');
   const [contraseña, setContraseña] = useState('');
   const [recordarme, setRecordarme] = useState(false);
+  const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const navigation = useNavigation();
 
   const handleLogin = async () => {
@@ -24,23 +25,69 @@ export default function LoginForm() {
     }
   };
 
+  const toggleMostrarContraseña = () => {
+    setMostrarContraseña(!mostrarContraseña);
+  };
+
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      accessible={false}
+      accessibilityLabel="Pantalla de inicio de sesión"
+    >
       {/* Logo */}
-      <Image source={logo} style={styles.logo} />
+      <Image 
+        source={logo} 
+        style={styles.logo}
+        accessible={true}
+        accessibilityRole="image"
+        accessibilityLabel="Logo de la aplicación"
+      />
 
       {/* Tarjeta de login */}
-      <View style={styles.loginCard}>
-        <Text style={styles.title}>Iniciar Sesión</Text>
+      <View 
+        style={styles.loginCard}
+        accessible={false}
+        accessibilityLabel="Formulario de inicio de sesión"
+      >
+        <Text 
+          style={styles.title}
+          accessible={true}
+          accessibilityRole="header"
+          accessibilityLevel={1}
+        >
+          Iniciar Sesión
+        </Text>
         
-        <View style={styles.registerSection}>
-          <Text style={styles.registerText}>No tienes una cuenta? </Text>
-          <TouchableOpacity>
+        <View 
+          style={styles.registerSection}
+          accessible={true}
+          accessibilityLabel="Opción de registro"
+        >
+          <Text 
+            style={styles.registerText}
+            accessible={true}
+            accessibilityRole="text"
+          >
+            No tienes una cuenta? 
+          </Text>
+          <TouchableOpacity
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Registrarme"
+            accessibilityHint="Ir a la pantalla de registro"
+          >
             <Text style={styles.registerLink}>Registrarme</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Usuario</Text>
+        <Text 
+          style={styles.label}
+          accessible={true}
+          accessibilityRole="text"
+        >
+          Usuario
+        </Text>
         <TextInput
           style={styles.input}
           value={correo}
@@ -48,36 +95,104 @@ export default function LoginForm() {
           autoCapitalize="none"
           keyboardType="email-address"
           placeholder="usuario@ejemplo.com"
+          accessible={true}
+          accessibilityLabel="Campo de correo electrónico"
+          accessibilityHint="Ingresa tu dirección de correo electrónico"
+          accessibilityRole="none"
+          textContentType="emailAddress"
+          autoComplete="email"
         />
 
-        <Text style={styles.label}>Contraseña</Text>
-        <View style={styles.passwordContainer}>
+        <Text 
+          style={styles.label}
+          accessible={true}
+          accessibilityRole="text"
+        >
+          Contraseña
+        </Text>
+        <View 
+          style={styles.passwordContainer}
+          accessible={false}
+        >
           <TextInput
             style={styles.passwordInput}
             value={contraseña}
             onChangeText={setContraseña}
-            secureTextEntry
+            secureTextEntry={!mostrarContraseña}
             placeholder="••••••••"
+            accessible={true}
+            accessibilityLabel="Campo de contraseña"
+            accessibilityHint="Ingresa tu contraseña"
+            accessibilityRole="none"
+            textContentType="password"
+            autoComplete="password"
           />
-          <TouchableOpacity style={styles.eyeIcon}>
-            <Text style={styles.eyeText}>👁</Text>
+          <TouchableOpacity 
+            style={styles.eyeIcon}
+            onPress={toggleMostrarContraseña}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={mostrarContraseña ? "Ocultar contraseña" : "Mostrar contraseña"}
+            accessibilityHint={mostrarContraseña ? "Oculta la contraseña" : "Muestra la contraseña"}
+          >
+            <Text 
+              style={styles.eyeText}
+              accessible={false}
+            >
+              {mostrarContraseña ? "🙈" : "👁"}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.checkboxContainer}>
+        <View 
+          style={styles.checkboxContainer}
+          accessible={false}
+        >
           <TouchableOpacity 
             style={styles.checkbox}
             onPress={() => setRecordarme(!recordarme)}
+            accessible={true}
+            accessibilityRole="checkbox"
+            accessibilityLabel="Recordarme"
+            accessibilityHint="Mantener la sesión iniciada"
+            accessibilityState={{ checked: recordarme }}
           >
-            <View style={[styles.checkboxBox, recordarme && styles.checkboxChecked]}>
-              {recordarme && <Text style={styles.checkboxTick}>✓</Text>}
+            <View 
+              style={[styles.checkboxBox, recordarme && styles.checkboxChecked]}
+              accessible={false}
+            >
+              {recordarme && (
+                <Text 
+                  style={styles.checkboxTick}
+                  accessible={false}
+                >
+                  ✓
+                </Text>
+              )}
             </View>
-            <Text style={styles.checkboxText}>Recordarme</Text>
+            <Text 
+              style={styles.checkboxText}
+              accessible={false}
+            >
+              Recordarme
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Entrar</Text>
+        <TouchableOpacity 
+          style={styles.loginButton} 
+          onPress={handleLogin}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Iniciar sesión"
+          accessibilityHint="Inicia sesión con las credenciales ingresadas"
+        >
+          <Text 
+            style={styles.loginButtonText}
+            accessible={false}
+          >
+            Entrar
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

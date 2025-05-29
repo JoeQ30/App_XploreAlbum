@@ -79,29 +79,29 @@ const CameraScreen = () => {
   };
 
   const pickImage = async () => {
-  // Pide permisos en iOS
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert('Permisos necesarios', 'Debes permitir acceso a la galería.');
-    return;
-  }
-
-  try {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      base64: true,
-    });
-
-    if (!result.canceled) {  // ¡Ojo! En Expo v49+ es "canceled" (no "cancelled")
-      setCapturedPhoto(result.assets[0]);  // Los datos están en `result.assets[0]`
-      analyzeImage(result.assets[0]);
+    // Pide permisos en iOS
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permisos necesarios', 'Debes permitir acceso a la galería.');
+      return;
     }
-  } catch (error) {
-    console.error('Error al seleccionar imagen:', error);
-    Alert.alert('Error', 'No se pudo seleccionar la imagen');
-  }
-};
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        setCapturedPhoto(result.assets[0]);
+        analyzeImage(result.assets[0]);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      Alert.alert('Error', 'No se pudo seleccionar la imagen');
+    }
+  };
 
   const analyzeImage = async (photo) => {
     try {
@@ -115,18 +115,7 @@ const CameraScreen = () => {
         type: 'image/jpeg',
       });
         
-//      const response = await axios.post('http://tu-backend/api/ai/recognize', formData, {
-//        headers: {
-//          'Content-Type': 'multipart/form-data',
-//        },
-//      });
-//
-//      if (response.data.success) {
-//        setPredictionResult(response.data);
-//      } else {
-//        Alert.alert('Error', 'No se pudo identificar el lugar');
-//      }
-        
+      // Código comentado para análisis de imagen
     } catch (error) {
       console.error('Error al analizar imagen:', error);
       Alert.alert('Error', 'Ocurrió un error al analizar la imagen');
@@ -188,7 +177,12 @@ const CameraScreen = () => {
   if (!permission) {
     return (
       <View style={styles.container}>
-        <Text style={styles.permissionText}>Cargando...</Text>
+        <Text 
+          style={styles.permissionText}
+          accessibilityRole="text"
+        >
+          Cargando...
+        </Text>
       </View>
     );
   }
@@ -196,13 +190,35 @@ const CameraScreen = () => {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <View style={styles.permissionContainer}>
-          <FontAwesome name="camera" size={60} color="#8BC34A" />
-          <Text style={styles.permissionTitle}>Acceso a la Cámara</Text>
-          <Text style={styles.permissionText}>
+        <View 
+          style={styles.permissionContainer}
+          accessibilityRole="main"
+        >
+          <FontAwesome 
+            name="camera" 
+            size={60} 
+            color="#8BC34A"
+            accessibilityElementsHidden={true}
+          />
+          <Text 
+            style={styles.permissionTitle}
+            accessibilityRole="header"
+          >
+            Acceso a la Cámara
+          </Text>
+          <Text 
+            style={styles.permissionText}
+            accessibilityRole="text"
+          >
             Necesitamos acceso a tu cámara para capturar nuevos coleccionables
           </Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <TouchableOpacity 
+            style={styles.permissionButton} 
+            onPress={requestPermission}
+            accessibilityRole="button"
+            accessibilityLabel="Dar permisos de cámara"
+            accessibilityHint="Otorga acceso a la cámara para poder tomar fotos"
+          >
             <Text style={styles.permissionButtonText}>Dar Permisos</Text>
           </TouchableOpacity>
         </View>
@@ -213,12 +229,20 @@ const CameraScreen = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <Text style={styles.headerTitle}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top }]}
+        accessibilityRole="header"
+      >
+        <Text 
+          style={styles.headerTitle}
+          accessibilityRole="header"
+          accessibilityLabel="Pantalla de cámara"
+        >
           <Image 
             source={require('../assets/images/logo/Letter1-F_Gris.png')} 
             style={styles.logoImage}
             resizeMode="contain"
+            accessibilityLabel="Logo de la aplicación"
           />
         </Text>
       </View>
@@ -230,6 +254,7 @@ const CameraScreen = () => {
           style={styles.camera}
           facing={facing}
           mode="picture"
+          accessibilityLabel={`Vista de cámara ${facing === 'back' ? 'trasera' : 'frontal'}`}
         >
           {/* Overlay con controles */}
           <View style={styles.cameraOverlay}>
@@ -237,13 +262,27 @@ const CameraScreen = () => {
             <TouchableOpacity
               style={styles.flipButton}
               onPress={toggleCameraFacing}
+              accessibilityRole="button"
+              accessibilityLabel={`Cambiar a cámara ${facing === 'back' ? 'frontal' : 'trasera'}`}
+              accessibilityHint="Alterna entre la cámara frontal y trasera"
             >
-              <FontAwesome name="refresh" size={24} color="white" />
+              <FontAwesome 
+                name="refresh" 
+                size={24} 
+                color="white"
+                accessibilityElementsHidden={true}
+              />
             </TouchableOpacity>
 
             {/* Instrucciones */}
-            <View style={styles.instructionContainer}>
-              <Text style={styles.instructionText}>
+            <View 
+              style={styles.instructionContainer}
+              accessibilityRole="text"
+            >
+              <Text 
+                style={styles.instructionText}
+                accessibilityLabel="Instrucciones: Apunta la cámara hacia el landmark que deseas desbloquear y toca el botón de captura"
+              >
                 Apunta la cámara hacia el landmark que deseas desbloquear y toca el botón de captura.
               </Text>
             </View>
@@ -256,8 +295,17 @@ const CameraScreen = () => {
                   style={styles.galleryButton}
                   onPress={pickImage}
                   disabled={isLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel="Seleccionar imagen de la galería"
+                  accessibilityHint="Abre la galería de fotos para seleccionar una imagen existente"
+                  accessibilityState={{ disabled: isLoading }}
                 >
-                  <FontAwesome name="photo" size={24} color="white" />
+                  <FontAwesome 
+                    name="photo" 
+                    size={24} 
+                    color="white"
+                    accessibilityElementsHidden={true}
+                  />
                 </TouchableOpacity>
 
                 {/* Botón de captura */}
@@ -265,11 +313,22 @@ const CameraScreen = () => {
                   style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
                   onPress={takePicture}
                   disabled={isLoading}
+                  accessibilityRole="button"
+                  accessibilityLabel={isLoading ? "Tomando foto" : "Tomar foto"}
+                  accessibilityHint="Captura una foto del landmark para analizarla"
+                  accessibilityState={{ disabled: isLoading, busy: isLoading }}
                 >
                   {isLoading ? (
-                    <ActivityIndicator color="white" size="large" />
+                    <ActivityIndicator 
+                      color="white" 
+                      size="large"
+                      accessibilityLabel="Cargando"
+                    />
                   ) : (
-                    <View style={styles.captureButtonInner} />
+                    <View 
+                      style={styles.captureButtonInner}
+                      accessibilityElementsHidden={true}
+                    />
                   )}
                 </TouchableOpacity>
               </View>
@@ -279,13 +338,35 @@ const CameraScreen = () => {
       </View>
 
       {/* Modal de análisis */}
-      <Modal visible={showAnalysis} transparent={true} animationType="fade">
-        <View style={styles.analysisContainer}>
+      <Modal 
+        visible={showAnalysis} 
+        transparent={true} 
+        animationType="fade"
+        accessibilityViewIsModal={true}
+      >
+        <View 
+          style={styles.analysisContainer}
+          accessibilityRole="dialog"
+          accessibilityLabel="Analizando imagen"
+        >
           <View style={styles.analysisBox}>
-            <ActivityIndicator size="large" color="#8BC34A" />
-            <Text style={styles.analysisText}>Analizando imagen...</Text>
+            <ActivityIndicator 
+              size="large" 
+              color="#8BC34A"
+              accessibilityLabel="Analizando imagen, por favor espera"
+            />
+            <Text 
+              style={styles.analysisText}
+              accessibilityRole="text"
+            >
+              Analizando imagen...
+            </Text>
             
-            <View style={styles.progressBarContainer}>
+            <View 
+              style={styles.progressBarContainer}
+              accessibilityRole="progressbar"
+              accessibilityLabel="Progreso del análisis"
+            >
               <Animated.View 
                 style={[
                   styles.progressBar,
@@ -296,6 +377,7 @@ const CameraScreen = () => {
                     }),
                   },
                 ]}
+                accessibilityElementsHidden={true}
               />
             </View>
           </View>
@@ -303,37 +385,86 @@ const CameraScreen = () => {
       </Modal>
 
       {/* Modal de previsualización */}
-      <Modal visible={showPreview} animationType="slide">
-        <View style={styles.previewContainer}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>
+      <Modal 
+        visible={showPreview} 
+        animationType="slide"
+        accessibilityViewIsModal={true}
+      >
+        <View 
+          style={styles.previewContainer}
+          accessibilityRole="dialog"
+          accessibilityLabel="Vista previa de la foto capturada"
+        >
+          <View 
+            style={styles.header}
+          >
+            <Text 
+              style={styles.headerTitle}
+              accessibilityRole="header"
+            >
               <Text style={styles.xText}>Vista</Text>
               <Text style={styles.albumText}> Previa</Text>
             </Text>
           </View>
 
           {capturedPhoto && (
-            <Image source={{ uri: capturedPhoto.uri }} style={styles.previewImage} />
+            <Image 
+              source={{ uri: capturedPhoto.uri }} 
+              style={styles.previewImage}
+              accessibilityLabel="Foto capturada del landmark"
+              accessibilityRole="image"
+            />
           )}
 
           {/* Resultado de la predicción */}
           {predictionResult && (
-            <View style={styles.predictionResult}>
-              <Text style={styles.predictionTitle}>Lugar Identificado</Text>
-              <Text style={styles.predictionName}>{predictionResult.lugar.nombre}</Text>
-              <Text style={styles.predictionConfidence}>
+            <View 
+              style={styles.predictionResult}
+              accessibilityLabel="Resultado del análisis"
+            >
+              <Text 
+                style={styles.predictionTitle}
+                accessibilityRole="header"
+              >
+                Lugar Identificado
+              </Text>
+              <Text 
+                style={styles.predictionName}
+                accessibilityRole="text"
+                accessibilityLabel={`Lugar identificado: ${predictionResult.lugar.nombre}`}
+              >
+                {predictionResult.lugar.nombre}
+              </Text>
+              <Text 
+                style={styles.predictionConfidence}
+                accessibilityRole="text"
+                accessibilityLabel={`Nivel de confianza: ${(predictionResult.prediction.confidence * 100).toFixed(1)} por ciento`}
+              >
                 Confianza: {(predictionResult.prediction.confidence * 100).toFixed(1)}%
               </Text>
             </View>
           )}
 
-          <View style={styles.previewControls}>
+          <View 
+            style={styles.previewControls}
+            accessibilityRole="toolbar"
+            accessibilityLabel="Controles de la vista previa"
+          >
             <TouchableOpacity
               style={[styles.previewButton, styles.retakeButton]}
               onPress={retakePhoto}
               disabled={isLoading}
+              accessibilityRole="button"
+              accessibilityLabel="Repetir foto"
+              accessibilityHint="Regresa a la cámara para tomar otra foto"
+              accessibilityState={{ disabled: isLoading }}
             >
-              <FontAwesome name="refresh" size={20} color="#666" />
+              <FontAwesome 
+                name="refresh" 
+                size={20} 
+                color="#666"
+                accessibilityElementsHidden={true}
+              />
               <Text style={styles.retakeButtonText}>Repetir</Text>
             </TouchableOpacity>
 
@@ -341,12 +472,25 @@ const CameraScreen = () => {
               style={[styles.previewButton, styles.saveButton]}
               onPress={saveCollection}
               disabled={isLoading}
+              accessibilityRole="button"
+              accessibilityLabel={isLoading ? "Guardando coleccionable" : "Obtener coleccionable"}
+              accessibilityHint="Guarda la foto como un coleccionable en tu álbum"
+              accessibilityState={{ disabled: isLoading, busy: isLoading }}
             >
               {isLoading ? (
-                <ActivityIndicator color="white" size="small" />
+                <ActivityIndicator 
+                  color="white" 
+                  size="small"
+                  accessibilityLabel="Guardando"
+                />
               ) : (
                 <>
-                  <FontAwesome name="trophy" size={20} color="white" />
+                  <FontAwesome 
+                    name="trophy" 
+                    size={20} 
+                    color="white"
+                    accessibilityElementsHidden={true}
+                  />
                   <Text style={styles.saveButtonText}>Obtener Coleccionable</Text>
                 </>
               )}

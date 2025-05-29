@@ -57,17 +57,38 @@ const getColeccionableImage = (coleccionable, fotos) => {
 // Componente Coleccionable individual actualizado
 const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
   const imageInfo = getColeccionableImage(coleccionable, fotos);
+  const isUnlocked = coleccionable.desbloqueado;
+  
+  // Descripción accesible del estado del coleccionable
+  const accessibilityHint = isUnlocked 
+    ? `Coleccionable desbloqueado. Toca para ver detalles de ${coleccionable.nombre}`
+    : `Coleccionable bloqueado. ${coleccionable.nombre} aún no ha sido desbloqueado`;
   
   return (
     <TouchableOpacity 
       style={[styles.coleccionableItem, { width: ITEM_WIDTH }]} 
       onPress={() => onPress(coleccionable)}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Coleccionable ${coleccionable.nombre}`}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: !isUnlocked }}
     >
-      <View style={styles.coleccionableImageContainer}>
+      <View 
+        style={styles.coleccionableImageContainer}
+        accessible={true}
+        accessibilityRole="image"
+      >
         <Image 
           source={imageInfo.source}
           style={styles.coleccionableImage}
           resizeMode="cover"
+          accessible={true}
+          accessibilityLabel={
+            isUnlocked 
+              ? `Imagen del lugar ${coleccionable.nombre}` 
+              : `Imagen bloqueada de ${coleccionable.nombre}`
+          }
           onError={(error) => {
             console.log('Error cargando imagen:', error);
           }}
@@ -75,23 +96,47 @@ const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
         
         {/* Overlay para coleccionables no desbloqueados */}
         {!coleccionable.desbloqueado && (
-          <View style={styles.lockedOverlay}>
-            <FontAwesome name="lock" size={24} color="white" />
+          <View 
+            style={styles.lockedOverlay}
+            accessible={true}
+            accessibilityLabel="Coleccionable bloqueado"
+            accessibilityRole="image"
+          >
+            <FontAwesome 
+              name="lock" 
+              size={24} 
+              color="white"
+              accessible={false}
+            />
           </View>
         )}
         
         {/* Indicador de desbloqueado */}
         {coleccionable.desbloqueado && (
-          <View style={styles.unlockedIndicator}>
-            <FontAwesome name="check-circle" size={16} color="#4CAF50" />
+          <View 
+            style={styles.unlockedIndicator}
+            accessible={true}
+            accessibilityLabel="Coleccionable desbloqueado"
+            accessibilityRole="image"
+          >
+            <FontAwesome 
+              name="check-circle" 
+              size={16} 
+              color="#4CAF50"
+              accessible={false}
+            />
           </View>
         )}
       </View>
       
-      <Text style={[
-        styles.coleccionableTitle,
-        !coleccionable.desbloqueado && styles.lockedTitle
-      ]}>
+      <Text 
+        style={[
+          styles.coleccionableTitle,
+          !coleccionable.desbloqueado && styles.lockedTitle
+        ]}
+        accessible={true}
+        accessibilityRole="text"
+      >
         {coleccionable.nombre}
       </Text>
     </TouchableOpacity>
@@ -109,10 +154,11 @@ const AlbumScreen = ({ user }) => {
     const fetchColeccionables = async () => {
       try {
         //console.log('Usuario en AlbumScreen:', user);
-
+   
         const dataColectibles = await listarColeccionables(user.id);
         setColeccionables(dataColectibles);
-
+      
+ 
         const dataFotos = await listarFotos();
         setFotos(dataFotos);
         //console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
@@ -124,7 +170,7 @@ const AlbumScreen = ({ user }) => {
         });
         
       } catch (error) {
-        console.error('Error al obtener coleccionables:', error);
+        console.log(' ');
       }
     };
     fetchColeccionables();
@@ -148,23 +194,55 @@ const AlbumScreen = ({ user }) => {
 
   const insets = useSafeAreaInsets();
 
+  // Conteo para accesibilidad
+  const totalColeccionables = coleccionables.length;
+  const coleccionablesDesbloqueados = coleccionables.filter(item => item.desbloqueado).length;
+  const currentCount = filteredColeccionables.length;
+
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      accessible={false}
+      accessibilityLabel="Pantalla del álbum de coleccionables"
+    >
       {/* Header de la pantalla principal */}
-      <View style={[styles.header, { paddingTop: insets.top + 30}]}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top + 30}]}
+        accessible={true}
+        accessibilityRole="header"
+      >
         <View style={styles.headerContent}>
           {/* Logo y título a la izquierda */}
-          <View style={styles.headerLeft}>
+          <View 
+            style={styles.headerLeft}
+            accessible={true}
+            accessibilityLabel="Título de la pantalla"
+          >
             <Image 
               source={require('../assets/images/logo/LogoXVerde.png')} 
               style={styles.logoImage}
               resizeMode="contain"
+              accessible={true}
+              accessibilityLabel="Logo de la aplicación"
+              accessibilityRole="image"
             />
-            <Text style={styles.albumText}>Album</Text>
+            <Text 
+              style={styles.albumText}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLevel={1}
+            >
+              Album
+            </Text>
           </View>
           
           {/* Pestañas a la derecha */}
-          <View style={styles.tabContainer}>
+          <View 
+            style={styles.tabContainer}
+            accessible={true}
+            accessibilityLabel="Filtros del álbum"
+            accessibilityRole="tablist"
+          >
             {['Coleccionados', 'Todos'].map((tab) => (
               <TouchableOpacity
                 key={tab}
@@ -173,6 +251,11 @@ const AlbumScreen = ({ user }) => {
                   activeTab === tab && styles.activeTab
                 ]}
                 onPress={() => setActiveTab(tab)}
+                accessible={true}
+                accessibilityRole="tab"
+                accessibilityLabel={`Filtro ${tab}`}
+                accessibilityHint={`Mostrar ${tab === 'Todos' ? 'todos los coleccionables' : 'solo coleccionables desbloqueados'}`}
+                accessibilityState={{ selected: activeTab === tab }}
               >
                 <Text style={[
                   styles.tabText,
@@ -187,13 +270,44 @@ const AlbumScreen = ({ user }) => {
       </View>
 
       {/* Sección de orden */}
-      <View style={styles.orderSection}>
-        <View style={styles.orderLeft}>
-          <FontAwesome name="random" size={16} color="#666" style={styles.orderIcon} />
-          <Text style={styles.orderText}>Orden</Text>
+      <View 
+        style={styles.orderSection}
+        accessible={true}
+        accessibilityLabel={`Mostrando ${currentCount} de ${totalColeccionables} coleccionables. ${coleccionablesDesbloqueados} desbloqueados.`}
+      >
+        <View 
+          style={styles.orderLeft}
+          accessible={true}
+          accessibilityLabel="Opciones de ordenamiento"
+        >
+          <FontAwesome 
+            name="random" 
+            size={16} 
+            color="#666" 
+            style={styles.orderIcon}
+            accessible={false}
+          />
+          <Text 
+            style={styles.orderText}
+            accessible={true}
+            accessibilityRole="text"
+          >
+            Orden
+          </Text>
         </View>
-        <TouchableOpacity style={styles.menuButton}>
-          <FontAwesome name="bars" size={18} color="#666" />
+        <TouchableOpacity 
+          style={styles.menuButton}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Menú de opciones"
+          accessibilityHint="Abre opciones adicionales de visualización"
+        >
+          <FontAwesome 
+            name="bars" 
+            size={18} 
+            color="#666"
+            accessible={false}
+          />
         </TouchableOpacity>
       </View>
 
@@ -216,6 +330,9 @@ const AlbumScreen = ({ user }) => {
           offset: (ITEM_WIDTH + 40) * Math.floor(index / 3),
           index,
         })}
+        accessible={true}
+        accessibilityLabel="Lista de coleccionables"
+        accessibilityHint="Desliza para ver más coleccionables"
       />
     </View>
   );

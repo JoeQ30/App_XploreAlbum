@@ -30,7 +30,7 @@ const AppNavigator = () => {
       case 'Perfil':
         return <ProfileScreen />;
       default:
-        return <AlbumScreen user={user} />;
+        return <ProfileScreen />;
     }
   };
 

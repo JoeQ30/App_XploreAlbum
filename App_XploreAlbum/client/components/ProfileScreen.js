@@ -54,103 +54,259 @@ const ProfileScreen = () => {
     },
   ];
 
-  
-
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#4A4A4A" barStyle="light-content" />
+      <StatusBar 
+        backgroundColor="#4A4A4A" 
+        barStyle="light-content"
+        accessible={true}
+        accessibilityLabel="Barra de estado con fondo gris oscuro"
+      />
       
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <View style={styles.logoContainer}>
+      <View 
+        style={[styles.header, { paddingTop: insets.top }]}
+        accessible={true}
+        accessibilityRole="header"
+        accessibilityLabel="Encabezado de la pantalla de perfil"
+      >
+        <View 
+          style={styles.logoContainer}
+          accessible={true}
+          accessibilityRole="text"
+          accessibilityLabel="Logo de la aplicación y título de perfil"
+        >
           <Text style={styles.logoX}>
             <Image 
-            source={require('../assets/images/logo/LogoXVerde.png')} 
-            style={styles.logoImage}
-            resizeMode="contain"
+              source={require('../assets/images/logo/LogoXVerde.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+              accessible={true}
+              accessibilityLabel="Logo de la aplicación X en color verde"
+              accessibilityRole="image"
             />
           </Text>
-          <Text style={styles.logoText}>Perfil</Text>
+          <Text 
+            style={styles.logoText}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel="Título de la sección: Perfil"
+          >
+            Perfil
+          </Text>
         </View>
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Notifications')}>
+        <View 
+          style={styles.headerIcons}
+          accessible={true}
+          accessibilityRole="toolbar"
+          accessibilityLabel="Botones de navegación del encabezado"
+        >
+          <TouchableOpacity 
+            style={styles.headerIcon} 
+            onPress={() => navigation.navigate('Notifications')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Ir a notificaciones"
+            accessibilityHint="Toca para ver tus notificaciones"
+          >
             <Icon name="notifications" size={24} color="white" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity 
+            style={styles.headerIcon}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir configuración"
+            accessibilityHint="Toca para acceder a la configuración"
+          >
             <Icon name="settings" size={24} color="white" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        accessible={true}
+        accessibilityLabel="Contenido del perfil, desliza para ver más información"
+      >
         {/* Profile Avatar */}
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
+        <View 
+          style={styles.avatarContainer}
+          accessible={true}
+          accessibilityRole="image"
+          accessibilityLabel="Foto de perfil del usuario"
+        >
+          <View 
+            style={styles.avatar}
+            accessible={true}
+            accessibilityLabel="Avatar predeterminado del usuario, icono de persona"
+          >
             <Icon name="person" size={60} color="#666" />
           </View>
         </View>
 
          {/* Información del usuario */}
-        <View style={styles.profileForm}>
-          <View style={styles.inputContainer}>
+        <View 
+          style={styles.profileForm}
+          accessible={true}
+          accessibilityLabel="Información del perfil del usuario"
+        >
+          <View 
+            style={styles.inputContainer}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Nombre de usuario: ${loguedUser?.nombre || 'Nombre de usuario'}`}
+          >
             <Text style={styles.input}>
               {loguedUser?.nombre || 'Nombre de usuario'}
             </Text>
           </View>
-          <View style={styles.inputContainer}>
+          <View 
+            style={styles.inputContainer}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Correo electrónico: ${loguedUser?.correo || 'Nombre y Apellidos'}`}
+          >
             <Text style={styles.input}>
               {loguedUser?.correo || 'Nombre y Apellidos'}
             </Text>
           </View>
-          <View style={styles.inputContainer}>
+          <View 
+            style={styles.inputContainer}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Biografía: ${loguedUser?.biografia || 'Soy nuevo en la app, ¡encantado de conocerte!'}`}
+          >
             <Text style={styles.input}>
               {loguedUser?.biografia || 'Soy nuevo en la app, ¡encantado de conocerte!'}
             </Text>
           </View>
-          <View style={styles.inputContainer}>
+          <View 
+            style={styles.inputContainer}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Año de registro: ${loguedUser?.fecha_registro?.slice(0, 4) || 'No disponible'}`}
+          >
             <Text style={styles.input}>
-              {"Año de Registro: " + (loguedUser?.fecha_registro.slice(0, 4) || 'No disponible')}
+              {"Año de Registro: " + (loguedUser?.fecha_registro?.slice(0, 4) || 'No disponible')}
             </Text>
           </View>
         </View>
 
         {/* Achievements Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Logros 🏆</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Achievements')}>
+        <View 
+          style={styles.section}
+          accessible={true}
+          accessibilityLabel="Sección de logros del usuario"
+        >
+          <View 
+            style={styles.sectionHeader}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel="Encabezado de la sección de logros"
+          >
+            <Text 
+              style={styles.sectionTitle}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLabel="Título: Logros"
+            >
+              Logros 
+            </Text>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('Achievements')}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Ver todos los logros"
+              accessibilityHint="Toca para ir a la pantalla completa de logros"
+            >
               <Icon name="keyboard-arrow-right" size={24} color="#8BC34A" />
             </TouchableOpacity>
           </View>
-          <View style={styles.achievementsContainer}>
-            {achievements.map((achievement) => (
-              <AchievementItem
+          <View 
+            style={styles.achievementsContainer}
+            accessible={true}
+            accessibilityLabel={`Lista de logros, ${achievements.length} elementos`}
+          >
+            {achievements.map((achievement, index) => (
+              <View
                 key={achievement.id}
-                icon={achievement.icon}
-                title={achievement.title}
-                description={achievement.description}
-                iconBg={achievement.iconBg}
-              />
+                accessible={true}
+                accessibilityLabel={`Logro ${index + 1} de ${achievements.length}: ${achievement.title}. ${achievement.description}`}
+              >
+                <AchievementItem
+                  icon={achievement.icon}
+                  title={achievement.title}
+                  description={achievement.description}
+                  iconBg={achievement.iconBg}
+                />
+              </View>
             ))}
           </View>
         </View>
 
         {/* Statistics Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Estadísticas</Text>
-            <TouchableOpacity>
+        <View 
+          style={styles.section}
+          accessible={true}
+          accessibilityLabel="Sección de estadísticas del usuario"
+        >
+          <View 
+            style={styles.sectionHeader}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel="Encabezado de la sección de estadísticas"
+          >
+            <Text 
+              style={styles.sectionTitle}
+              accessible={true}
+              accessibilityRole="header"
+              accessibilityLabel="Título: Estadísticas"
+            >
+              Estadísticas
+            </Text>
+            <TouchableOpacity
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Ver más estadísticas"
+              accessibilityHint="Toca para ver estadísticas detalladas"
+            >
               <Icon name="keyboard-arrow-right" size={24} color="#8BC34A" />
             </TouchableOpacity>
           </View>
-          <View style={styles.statisticsContainer}>
-            <View style={styles.statisticItem}>
-              <View style={styles.chartIcon}>
+          <View 
+            style={styles.statisticsContainer}
+            accessible={true}
+            accessibilityLabel="Contenedor de estadísticas"
+          >
+            <View 
+              style={styles.statisticItem}
+              accessible={true}
+              accessibilityRole="summary"
+              accessibilityLabel="Progreso: Has descubierto 16 de 30 lugares"
+            >
+              <View 
+                style={styles.chartIcon}
+                accessible={true}
+                accessibilityLabel="Icono de gráfico de tendencia ascendente"
+              >
                 <Icon name="trending-up" size={30} color="#8BC34A" />
               </View>
               <View style={styles.statisticInfo}>
-                <Text style={styles.statisticTitle}>Progreso</Text>
-                <Text style={styles.statisticDescription}>
+                <Text 
+                  style={styles.statisticTitle}
+                  accessible={true}
+                  accessibilityRole="header"
+                  accessibilityLabel="Título de estadística: Progreso"
+                >
+                  Progreso
+                </Text>
+                <Text 
+                  style={styles.statisticDescription}
+                  accessible={true}
+                  accessibilityRole="text"
+                  accessibilityLabel="Descripción: Has descubierto 16 de 30 lugares"
+                >
                   Has descubierto 16 de 30 lugares
                 </Text>
               </View>
