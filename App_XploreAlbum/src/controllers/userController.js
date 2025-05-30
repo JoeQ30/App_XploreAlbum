@@ -64,13 +64,12 @@ const getUserByName = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { nombre, correo, password, foto_perfil, biografia, visibilidad_perfil } = req.body;
+        const { nombre, correo,  foto_perfil, biografia, visibilidad_perfil } = req.body;
 
         const usuario = await db.updateUsuario(
             id, 
             nombre, 
-            correo, 
-            password, 
+            correo,  
             foto_perfil, 
             biografia, 
             visibilidad_perfil // solo dos estados -> 'publico' o 'solo_seguidores'
@@ -84,11 +83,42 @@ const updateUser = async (req, res, next) => {
     }
 };
 
+const updateUserPassword = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { actualPass, newPassword } = req.body;
+
+        // Verificar la contraseña actual
+        const usuario = await db.getUsuarioByID(id);
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        const isMatch = await bcrypt.compare(actualPass, usuario.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+        }
+
+        // Encriptado de la contraseña
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        const result = await db.updateUsuarioPassword(id, hashedPassword);
+        if (!result) {
+            return res.status(404).json({ error: 'No se encontró al usuario a actualizar' });
+        }
+        return res.json(result);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     list,
     deleteUserById,
     deleteUserByName,
     getUserById,
     getUserByName,
-    updateUser
+    updateUser,
+    updateUserPassword
 };

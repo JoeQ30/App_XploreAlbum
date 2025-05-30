@@ -386,6 +386,12 @@ const getCategorias = async () => {
     return res.rows;
 };
 
+const updateUsuarioPassword = async (id, hashedPassword) => {
+    const res = await db.query(`
+        UPDATE usuarios SET password = $1 WHERE id_usuario = $2 RETURNING *`,
+        [hashedPassword, id]);
+    return res.rows[0];
+};
 
 module.exports = {
     listarUsuarios,
@@ -435,6 +441,7 @@ module.exports = {
     getCategorias,
     setUltimaConexion,
     ListarLogrosById,
+    updateUsuarioPassword,
     db,
 };
 

@@ -139,4 +139,33 @@ export const listarFotos = async () => {
   }
 };
 
+//router.put('/users/:id', userController.updateUser);
+//{ nombre, correo,  foto_perfil, biografia, visibilidad_perfil }
+
+export const actualizarUsuario = async (id, data) => {
+  try {
+    const response = await api.put(`/users/${id}`, data);
+    console.log('[UPDATE USER] Usuario actualizado:', response.data);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    throw new Error('Error al actualizar usuario');
+  }
+}
+
+//router.put('/users/:id/password', userController.updateUserPassword);
+
+export const actualizarContraseña = async (id, thisNewPassword, thisActualPassword) => {
+  try {
+    const response = await api.put(`/users/${id}/password`, { actualPassword: thisActualPassword, newPassword: thisNewPassword });
+    console.log('[UPDATE PASSWORD] Contraseña actualizada:', response.data);
+    return response.data;
+  }
+  catch (error) {
+    console.error('Error al actualizar contraseña:', error);
+    throw new Error('Error al actualizar contraseña');
+  }
+} 
+
 export default api;

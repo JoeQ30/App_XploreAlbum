@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
 const CameraScreen = () => {
@@ -41,11 +41,13 @@ const CameraScreen = () => {
     if (!mediaLibraryPermission?.granted) requestMediaLibraryPermission();
   }, []);
 
-  useEffect(() => {
-    if (showAnalysis) {
-      startProgressAnimation();
-    }
-  }, [showAnalysis]);
+  useFocusEffect(
+    useCallback(() => {
+      if (showAnalysis) {
+        startProgressAnimation();
+      }
+    }, [showAnalysis])
+  );
 
   const startProgressAnimation = () => {
     progressAnim.setValue(0);

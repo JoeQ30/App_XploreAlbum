@@ -9,6 +9,7 @@ import AchievementsScreen from './components/AchievementsScreen';
 import UserProfile from './components/UserProfile'; 
 import SplashScreen from './components/SplashScreen'; 
 import RegisterScreen from './components/RegisterScreen';
+import ConfigurationScreen from './components/ConfigurationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name="Achievements" component={AchievementsScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} /> 
         <Stack.Screen name="Profile" component={UserProfile} />
+        <Stack.Screen name="Configuration" component={ConfigurationScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>

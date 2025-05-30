@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Iconos usando Material Icons con accesibilidad mejorada
@@ -71,6 +71,7 @@ const LandmarkIcon = () => (
 const NotificationsScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  const [loguedUser, setLoguedUser] = useState(null);
   const [notifications, setNotifications] = useState([
     {
       id: '1',
@@ -97,6 +98,23 @@ const NotificationsScreen = () => {
       icon: 'landmark',
     },
   ]);
+
+  useFocusEffect(
+  useCallback(() => {
+    const fetchUser = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('usuario');
+        setLoguedUser(JSON.parse(jsonValue));
+
+      } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+      }
+    };
+
+    fetchUser();
+  }, [])
+);
+
 
   const handleAccept = (id) => {
     console.log('Aceptar notificación:', id);

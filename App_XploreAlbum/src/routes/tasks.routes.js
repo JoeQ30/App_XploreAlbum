@@ -36,6 +36,7 @@ router.delete('/users', userController.deleteUserByName);
 router.get('/users/search/:name', userController.getUserByName);
 router.get('/users/:id', userController.getUserById);
 router.put('/users/:id', userController.updateUser);
+router.put('/users/:id/password', userController.updateUserPassword);
 
 // -------- Seguimientos --------
 router.post('/users/:id/follow', followController.follow);

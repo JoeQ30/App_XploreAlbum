@@ -3,13 +3,13 @@ import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } fro
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const logo = require('../assets/images/logo/Letter1-F_Verde.png');
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState('');
   const [contraseña, setContraseña] = useState('');
-  const [recordarme, setRecordarme] = useState(false);
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
   const navigation = useNavigation();
 
@@ -18,8 +18,8 @@ export default function LoginForm() {
       const userData = await login(correo, contraseña);
       console.log(correo, contraseña);
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
-      console.log('[LOGIN] Datos del usuario:', userData);
-      navigation.navigate('Navigator', { user: userData });
+    
+      navigation.navigate('Navigator');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Credenciales inválidas');

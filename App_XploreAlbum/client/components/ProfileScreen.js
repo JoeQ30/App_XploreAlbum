@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback , useState } from 'react';
 import {
   View,
   Text,
@@ -14,28 +14,45 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AchievementItem from './Items/AchievementItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [loguedUser, setLoguedUser] = useState(null);
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const jsonValue = await AsyncStorage.getItem('usuario');
-        if (jsonValue != null) {
-          setLoguedUser(JSON.parse(jsonValue));
-          console.log('[PROFILE]: Usuario cargado:', JSON.parse(jsonValue));
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadUser = async () => {
+        try {
+          const jsonValue = await AsyncStorage.getItem('usuario');
+          if (jsonValue != null) {
+            setLoguedUser(JSON.parse(jsonValue));
+            console.log('[PROFILE]: Usuario cargado:', JSON.parse(jsonValue));
+          }
+        } catch (e) {
+          console.error('Error al cargar el usuario:', e);
         }
-      } catch (e) {
-        console.error('Error al cargar el usuario:', e);
-      }
-    };
+      };
 
-    loadUser();
-  }, []);
+      loadUser();
+    }, [])
+  );
+
+  const handleLogOut = async () => {
+  try {
+    await AsyncStorage.multiRemove(['usuario', 'token']);
+    console.log('[PROFILE]: Usuario desconectado');
+
+    // Redirigir y limpiar historial de navegación
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  } catch (e) {
+    console.error('Error al cerrar sesión:', e);
+  }
+};
 
   const achievements = [
     {
@@ -103,6 +120,16 @@ const ProfileScreen = () => {
         >
           <TouchableOpacity 
             style={styles.headerIcon} 
+            onPress={handleLogOut}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar sesión"
+            accessibilityHint="Toca para cerrar sesión"
+          >
+            <Icon name="logout" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.headerIcon} 
             onPress={() => navigation.navigate('Notifications')}
             accessible={true}
             accessibilityRole="button"
@@ -114,6 +141,7 @@ const ProfileScreen = () => {
           <TouchableOpacity 
             style={styles.headerIcon}
             accessible={true}
+            onPress={() => navigation.navigate('Configuration')}
             accessibilityRole="button"
             accessibilityLabel="Abrir configuración"
             accessibilityHint="Toca para acceder a la configuración"

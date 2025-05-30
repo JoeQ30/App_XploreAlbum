@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect  } from 'react';
+
 import { FontAwesome } from '@expo/vector-icons';
 import { 
   View, 
@@ -10,7 +11,7 @@ import {
   Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect  } from '@react-navigation/native';
 import { listarColeccionables, listarFotos } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -143,38 +144,51 @@ const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
   );
 };
 
-const AlbumScreen = ({ user }) => {
+const AlbumScreen = () => {
   const [activeTab, setActiveTab] = useState('Todos');
   const navigation = useNavigation();
   const [coleccionables, setColeccionables] = useState([]);
   const [loguedUser, setLoguedUser] = useState(null);
   const [fotos, setFotos] = useState([]);
-  
-  useEffect(() => {
-    const fetchColeccionables = async () => {
-      try {
-        //console.log('Usuario en AlbumScreen:', user);
-   
-        const dataColectibles = await listarColeccionables(user.id);
-        setColeccionables(dataColectibles);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchColeccionables = async () => {
+        try {
+          console.log('[AlbumScreen] Cargando usuario...');
+          const jsonValue = await AsyncStorage.getItem('usuario');
+          const usuario = JSON.parse(jsonValue);
+          
+          // Verificar que el usuario existe y tiene id antes de continuar
+          if (!usuario || !usuario.id) {
+            console.error('[AlbumScreen] Usuario no válido:', usuario);
+            return;
+          }
+          
+          setLoguedUser(usuario);
+          console.log('[AlbumScreen] Usuario logueado:', usuario);
+
+          const dataColectibles = await listarColeccionables(usuario.id);
+          setColeccionables(dataColectibles);
+        
+          const dataFotos = await listarFotos();
+          setFotos(dataFotos);
+          //console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
+          
+          // Log para verificar la relación entre coleccionables y fotos
+          dataColectibles.forEach(coleccionable => {
+            const fotoCorrespondiente = dataFotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
+            //console.log(`Coleccionable: ${coleccionable.nombre}, Lugar: ${coleccionable.id_lugar}, Foto encontrada:`, fotoCorrespondiente?.ruta_imagen || 'No encontrada');
+          });
+          
+        } catch (error) {
+          console.error('[AlbumScreen] Error cargando datos:', error);
+        }
+      };
       
- 
-        const dataFotos = await listarFotos();
-        setFotos(dataFotos);
-        //console.log('[AlbumScreen] Fotos obtenidas:', dataFotos);
-        
-        // Log para verificar la relación entre coleccionables y fotos
-        dataColectibles.forEach(coleccionable => {
-          const fotoCorrespondiente = dataFotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
-          //console.log(`Coleccionable: ${coleccionable.nombre}, Lugar: ${coleccionable.id_lugar}, Foto encontrada:`, fotoCorrespondiente?.ruta_imagen || 'No encontrada');
-        });
-        
-      } catch (error) {
-        console.log(' ');
-      }
-    };
-    fetchColeccionables();
-  }, []);
+      fetchColeccionables();
+    }, []) // Removido loguedUser.id de las dependencias
+  );
 
   const filteredColeccionables = activeTab === 'Coleccionados' 
     ? coleccionables.filter(item => item.desbloqueado)

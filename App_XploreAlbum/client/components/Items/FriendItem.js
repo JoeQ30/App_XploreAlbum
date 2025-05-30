@@ -2,42 +2,78 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const FriendItem = ({ name, location, onAddPress }) => {
+const FriendItem = ({ 
+  name, 
+  location, 
+  onAddPress, 
+  showAddButton = true, 
+  accessible = true,
+  accessibilityLabel 
+}) => {
   return (
-      <View style={styles.friendContainer}>
-        <View style={styles.friendInfo}>
-          <View style={styles.avatar}>
-            <Icon name="person" size={30} color="#666" />
-          </View>
-          <View style={styles.textContainer}>
-            <Text style={styles.friendName}>{name}</Text>
-            <Text style={styles.friendLocation}>{location}</Text>
-          </View>
+    <View 
+      style={styles.container}
+      accessible={accessible}
+      accessibilityLabel={accessibilityLabel}
+    >
+      <View style={styles.leftSection}>
+        <View style={styles.avatar}>
+          <Icon name="person" size={30} color="#666" />
         </View>
-      <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
-        <Icon name="add" size={24} color="white" />
-      </TouchableOpacity>
+        <View style={styles.userInfo}>
+          <Text 
+            style={styles.name}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Nombre: ${name}`}
+          >
+            {name}
+          </Text>
+          {location && (
+            <Text 
+              style={styles.location}
+              accessible={true}
+              accessibilityRole="text"
+              accessibilityLabel={`Ubicación: ${location}`}
+            >
+              {location}
+            </Text>
+          )}
+        </View>
       </View>
+      
+      {showAddButton && onAddPress && (
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={onAddPress}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={`Agregar a ${name} como amigo`}
+          accessibilityHint="Toca para enviar solicitud de amistad"
+        >
+          <Icon name="add" size={24} color="white" />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  friendContainer: {
+  container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: 'white',
-    padding: 15,
     marginHorizontal: 15,
     marginVertical: 5,
-    borderRadius: 10,
+    padding: 15,
+    borderRadius: 15,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  friendInfo: {
+  leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
@@ -46,29 +82,29 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: '#F0F0F0',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
-  textContainer: {
+  userInfo: {
     flex: 1,
   },
-  friendName: {
+  name: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
     marginBottom: 2,
   },
-  friendLocation: {
+  location: {
     fontSize: 14,
     color: '#666',
   },
   addButton: {
+    backgroundColor: '#8BC34A',
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#8BC34A',
     justifyContent: 'center',
     alignItems: 'center',
   },

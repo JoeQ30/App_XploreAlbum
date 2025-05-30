@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback  } from 'react';
 import {
   View,
   Text,
@@ -16,43 +16,134 @@ import FriendItem from './Items/FriendItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listarUsuarios } from '../services/api'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const FriendsScreen = () => {
   const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState('friends'); // 'friends' or 'users'
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [users, setUsers] = useState([]);
-  const [loguedUser, setLoguedUser] = useState(null);	
+  const [loguedUser, setLoguedUser] = useState(null);
+  const [friends, setFriends] = useState([]); // Lista de amigos del usuario
 
-  useEffect(() => {
+  useFocusEffect(
+  useCallback(() => {
     const fetchUsers = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem('usuario');
         setLoguedUser(JSON.parse(jsonValue));
 
-        //console.log('[FRIENDS]: Usuario logueado:', JSON.parse(jsonValue));
-
         const data = await listarUsuarios();
         setUsers(data);
+        
+        // Aquí deberías cargar los amigos del usuario desde tu API
+        // Por ahora uso un array vacío como ejemplo
+        // const friendsData = await obtenerAmigos(JSON.parse(jsonValue).id);
+        // setFriends(friendsData);
+        setFriends([]); // Reemplaza esto con la llamada real a tu API
       } catch (error) {
         console.error('Error al obtener usuarios:', error);
       }
     };
 
     fetchUsers();
-  }, []);
+  }, [])
+);
 
   const handleAddFriend = (friendId) => {
     console.log('Agregando amigo:', friendId);
+    // Aquí implementarías la lógica para agregar amigo
   };
 
+  // Filtrar usuarios que NO son amigos
   const filteredUsers = users
     .filter((u) => u.id_usuario !== loguedUser?.id)
+    .filter((u) => !friends.some(friend => friend.id_usuario === u.id_usuario))
     .filter((u) => 
       searchText === '' || 
       u.nombre.toLowerCase().includes(searchText.toLowerCase())
     );
+
+  // Filtrar amigos
+  const filteredFriends = friends.filter((friend) => 
+    searchText === '' || 
+    friend.nombre.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const renderTabButton = (tabKey, title) => (
+    <TouchableOpacity
+      style={[
+        styles.tabButton,
+        activeTab === tabKey && styles.activeTabButton
+      ]}
+      onPress={() => setActiveTab(tabKey)}
+      accessible={true}
+      accessibilityRole="tab"
+      accessibilityLabel={`Pestaña ${title}`}
+      accessibilityState={{ selected: activeTab === tabKey }}
+    >
+      <Text style={[
+        styles.tabButtonText,
+        activeTab === tabKey && styles.activeTabButtonText
+      ]}>
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderUsersList = () => {
+    const isShowingFriends = activeTab === 'friends';
+    const dataToShow = isShowingFriends ? filteredFriends : filteredUsers;
+    const emptyMessage = isShowingFriends 
+      ? (searchText ? 'No se encontraron amigos con ese nombre' : 'Aún no tienes amigos agregados')
+      : (searchText ? 'No se encontraron usuarios con ese nombre' : 'No hay usuarios disponibles');
+
+    return (
+      <ScrollView 
+        style={styles.friendsList} 
+        showsVerticalScrollIndicator={false}
+        accessible={true}
+        accessibilityLabel={`Lista de ${isShowingFriends ? 'amigos' : 'usuarios disponibles'}. ${dataToShow.length} ${isShowingFriends ? 'amigos' : 'usuarios'} encontrados`}
+        accessibilityRole="list"
+      >
+        {dataToShow.length === 0 ? (
+          <View 
+            style={styles.emptyContainer}
+            accessible={true}
+            accessibilityLabel={emptyMessage}
+            accessibilityRole="text"
+          >
+            <Text style={styles.emptyText}>
+              {emptyMessage}
+            </Text>
+          </View>
+        ) : (
+          dataToShow.map((user, index) => (
+            <TouchableOpacity 
+              key={user.id_usuario}
+              onPress={() => navigation.navigate('Profile', { user })}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={`Ver perfil de ${user.nombre}, ubicado en ${user.ubicacion || 'ubicación no especificada'}`}
+              accessibilityHint="Toca para ver el perfil completo de este usuario"
+              accessibilityState={{ selected: false }}
+            >
+              <FriendItem
+                key={user.id_usuario}
+                name={user.nombre}
+                location={user.ubicacion}
+                onAddPress={isShowingFriends ? undefined : () => handleAddFriend(user.id_usuario)}
+                showAddButton={!isShowingFriends}
+                accessible={true}
+                accessibilityLabel={`Usuario ${index + 1} de ${dataToShow.length}: ${user.nombre}`}
+              />
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
+    );
+  };
 
   return (
     <SafeAreaView 
@@ -89,6 +180,17 @@ const FriendsScreen = () => {
         </View>
       </View>
 
+      {/* Tab Buttons */}
+      <View 
+        style={styles.tabContainer}
+        accessible={true}
+        accessibilityRole="tablist"
+        accessibilityLabel="Pestañas de navegación"
+      >
+        {renderTabButton('friends', 'Mis Amigos')}
+        {renderTabButton('users', 'Buscar Usuarios')}
+      </View>
+
       {/* Search Bar */}
       <View 
         style={styles.searchContainer}
@@ -105,59 +207,19 @@ const FriendsScreen = () => {
         />
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar Usuario"
+          placeholder={activeTab === 'friends' ? "Buscar Amigo" : "Buscar Usuario"}
           value={searchText}
           onChangeText={setSearchText}
           accessible={true}
-          accessibilityLabel="Campo de búsqueda de usuarios"
-          accessibilityHint="Escribe el nombre del usuario que deseas buscar"
+          accessibilityLabel={`Campo de búsqueda de ${activeTab === 'friends' ? 'amigos' : 'usuarios'}`}
+          accessibilityHint={`Escribe el nombre del ${activeTab === 'friends' ? 'amigo' : 'usuario'} que deseas buscar`}
           returnKeyType="search"
           clearButtonMode="while-editing"
         />
       </View>
 
-      {/* Users List */}
-      <ScrollView 
-        style={styles.friendsList} 
-        showsVerticalScrollIndicator={false}
-        accessible={true}
-        accessibilityLabel={`Lista de usuarios disponibles. ${filteredUsers.length} usuarios encontrados`}
-        accessibilityRole="list"
-      >
-        {filteredUsers.length === 0 ? (
-          <View 
-            style={styles.emptyContainer}
-            accessible={true}
-            accessibilityLabel="No se encontraron usuarios"
-            accessibilityRole="text"
-          >
-            <Text style={styles.emptyText}>
-              {searchText ? 'No se encontraron usuarios con ese nombre' : 'No hay usuarios disponibles'}
-            </Text>
-          </View>
-        ) : (
-          filteredUsers.map((u, index) => (
-            <TouchableOpacity 
-              key={u.id_usuario}
-              onPress={() => navigation.navigate('Profile', { user: u })}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={`Ver perfil de ${u.nombre}, ubicado en ${u.ubicacion || 'ubicación no especificada'}`}
-              accessibilityHint="Toca para ver el perfil completo de este usuario"
-              accessibilityState={{ selected: false }}
-            >
-              <FriendItem
-                key={u.id_usuario}
-                name={u.nombre}
-                location={u.ubicacion}
-                onAddPress={() => handleAddFriend(u.id_usuario)}
-                accessible={true}
-                accessibilityLabel={`Usuario ${index + 1} de ${filteredUsers.length}: ${u.nombre}`}
-              />
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
+      {/* Users/Friends List */}
+      {renderUsersList()}
     </SafeAreaView>
   );
 };
@@ -186,6 +248,38 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 8,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    marginTop: 15,
+    borderRadius: 25,
+    padding: 4,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  activeTabButton: {
+    backgroundColor: '#8BC34A',
+  },
+  tabButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
+  },
+  activeTabButtonText: {
+    color: 'white',
+    fontWeight: '600',
   },
   searchContainer: {
     flexDirection: 'row',

@@ -1,30 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import BottomNavigation from './BottomNavigation';
 import AlbumScreen from './AlbumScreen';
 import CameraScreen from './CameraScreen';
 import FriendsScreen from './FriendsScreen';
 import ProfileScreen from './ProfileScreen';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
 
 const AppNavigator = () => {
   const [activeTab, setActiveTab] = useState('Album');
-  const [user, setUser] = useState(null);
+  const [loguedUser, setLoguedUser] = useState(null);
   const route = useRoute();
 
-  useEffect(() => {
-    if (route.params?.user) {
-      setUser(route.params.user);
-      //console.log('[AppNavigator] Usuario recibido:', route.params.user);
-    }
-  }, [route.params?.user]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUser = async () => {
+        console.log('Fetching user data...');
+        const jsonValue = await AsyncStorage.getItem('usuario');
+        setLoguedUser(JSON.parse(jsonValue));
+      };
+
+      fetchUser();
+    }, [])
+  );
 
   const renderActiveScreen = () => {
     switch(activeTab) {
       case 'Cámara':
         return <CameraScreen />;
       case 'Album':
-        return <AlbumScreen user={user} />;
+        return <AlbumScreen />;
       case 'Amigos':
         return <FriendsScreen />;
       case 'Perfil':
