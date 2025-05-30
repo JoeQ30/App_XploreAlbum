@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Platform } from 'react-native';
 
 const API_BASE_URL = 'http://192.168.7.241:3000'; 
+
 //const API_BASE_URL = 'http://192.168.1.28:3000';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,6 +42,28 @@ export const login = async (thisEmail, thisPassword) => {
   } catch (error) {
     console.log('error: ', error);
     throw new Error('Credenciales inválidas o error del servidor');
+  }
+};
+
+export const register = async (thisEmail, thisPassword, thisName) => {
+  try {
+    console.log('Intentando registrar usuario con: \nnombre ->', thisName, '\nemail ->', thisEmail, '\npassword ->', thisPassword);
+
+    const response = await api.post('/auth/register_user', {
+      nombre: thisName,
+      email: thisEmail,
+      password: thisPassword,
+      foto_perfil: null, 
+      biografia: null 
+    });
+    //imprimir el JSON de respuesta
+    const usuario = response.data;
+    console.log('--------------\n[REGISTER] Respuesta del servidor:', usuario, '\n--------------');
+
+    return usuario;
+  } catch (error) {
+    console.error('Error al registrar usuario:', error);
+    throw new Error('Error al registrar usuario. Por favor, intenta de nuevo.');
   }
 };
 

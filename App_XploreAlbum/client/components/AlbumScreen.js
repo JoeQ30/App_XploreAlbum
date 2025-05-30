@@ -269,48 +269,6 @@ const AlbumScreen = ({ user }) => {
         </View>
       </View>
 
-      {/* Sección de orden */}
-      <View 
-        style={styles.orderSection}
-        accessible={true}
-        accessibilityLabel={`Mostrando ${currentCount} de ${totalColeccionables} coleccionables. ${coleccionablesDesbloqueados} desbloqueados.`}
-      >
-        <View 
-          style={styles.orderLeft}
-          accessible={true}
-          accessibilityLabel="Opciones de ordenamiento"
-        >
-          <FontAwesome 
-            name="random" 
-            size={16} 
-            color="#666" 
-            style={styles.orderIcon}
-            accessible={false}
-          />
-          <Text 
-            style={styles.orderText}
-            accessible={true}
-            accessibilityRole="text"
-          >
-            Orden
-          </Text>
-        </View>
-        <TouchableOpacity 
-          style={styles.menuButton}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel="Menú de opciones"
-          accessibilityHint="Abre opciones adicionales de visualización"
-        >
-          <FontAwesome 
-            name="bars" 
-            size={18} 
-            color="#666"
-            accessible={false}
-          />
-        </TouchableOpacity>
-      </View>
-
       {/* Grid de coleccionables con FlatList optimizado */}
       <FlatList
         data={filteredColeccionables}

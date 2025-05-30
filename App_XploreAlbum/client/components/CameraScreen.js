@@ -192,7 +192,6 @@ const CameraScreen = () => {
       <View style={styles.container}>
         <View 
           style={styles.permissionContainer}
-          accessibilityRole="main"
         >
           <FontAwesome 
             name="camera" 

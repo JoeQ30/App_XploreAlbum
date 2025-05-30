@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const logo = require('../assets/images/logo/Letter1-F_Verde.png');
 
@@ -76,8 +77,10 @@ export default function LoginForm() {
             accessibilityRole="button"
             accessibilityLabel="Registrarme"
             accessibilityHint="Ir a la pantalla de registro"
+            onPress={() => navigation.navigate('Register')}
           >
             <Text style={styles.registerLink}>Registrarme</Text>
+
           </TouchableOpacity>
         </View>
 
@@ -135,47 +138,12 @@ export default function LoginForm() {
             accessibilityLabel={mostrarContraseña ? "Ocultar contraseña" : "Mostrar contraseña"}
             accessibilityHint={mostrarContraseña ? "Oculta la contraseña" : "Muestra la contraseña"}
           >
-            <Text 
-              style={styles.eyeText}
+            <MaterialIcons 
+              name={mostrarContraseña ? "visibility-off" : "visibility"}
+              size={24}
+              color="#999"
               accessible={false}
-            >
-              {mostrarContraseña ? "🙈" : "👁"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View 
-          style={styles.checkboxContainer}
-          accessible={false}
-        >
-          <TouchableOpacity 
-            style={styles.checkbox}
-            onPress={() => setRecordarme(!recordarme)}
-            accessible={true}
-            accessibilityRole="checkbox"
-            accessibilityLabel="Recordarme"
-            accessibilityHint="Mantener la sesión iniciada"
-            accessibilityState={{ checked: recordarme }}
-          >
-            <View 
-              style={[styles.checkboxBox, recordarme && styles.checkboxChecked]}
-              accessible={false}
-            >
-              {recordarme && (
-                <Text 
-                  style={styles.checkboxTick}
-                  accessible={false}
-                >
-                  ✓
-                </Text>
-              )}
-            </View>
-            <Text 
-              style={styles.checkboxText}
-              accessible={false}
-            >
-              Recordarme
-            </Text>
+            />
           </TouchableOpacity>
         </View>
 
@@ -333,6 +301,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    marginTop: 35,
   },
   loginButtonText: {
     color: 'white',

@@ -15,7 +15,7 @@ const AppNavigator = () => {
   useEffect(() => {
     if (route.params?.user) {
       setUser(route.params.user);
-      console.log('[AppNavigator] Usuario recibido:', route.params.user);
+      //console.log('[AppNavigator] Usuario recibido:', route.params.user);
     }
   }, [route.params?.user]);
 

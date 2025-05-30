@@ -8,6 +8,7 @@ import NotificationsScreen from './components/NotificationsScreen';
 import AchievementsScreen from './components/AchievementsScreen';
 import UserProfile from './components/UserProfile'; 
 import SplashScreen from './components/SplashScreen'; 
+import RegisterScreen from './components/RegisterScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +19,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginForm} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Navigator" component={AppNavigator} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Achievements" component={AchievementsScreen} />
