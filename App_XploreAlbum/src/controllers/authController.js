@@ -4,9 +4,9 @@ const jwt = require('jsonwebtoken');
 
 const registerUser = async (req, res, next) => {
     try {
-        const { nombre, email, password, foto_perfil, biografia } = req.body;
+        const { nombre, email, password, foto_perfil, biografia, ubicacion } = req.body;
 
-        console.log({ nombre, email, password, foto_perfil, biografia });
+        console.log({ nombre, email, password, foto_perfil, biografia, ubicacion });
 
         // Encriptado de la contraseña
         const saltRounds = 10;
@@ -17,7 +17,8 @@ const registerUser = async (req, res, next) => {
             email,
             hashedPassword,
             foto_perfil || null,
-            biografia || null
+            biografia || null,
+            ubicacion || null
         );
 
         const usuario = result[0];

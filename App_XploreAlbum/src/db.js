@@ -56,8 +56,8 @@ const ListarLogrosById = async (id) => {
 };
 
 
-const insertarUsuario = async (nombre, email, password, foto_perfil, biografia) => {
-    console.log({ nombre, email, password, foto_perfil, biografia });
+const insertarUsuario = async (nombre, email, password, foto_perfil, biografia, ubicacion) => {
+    console.log({ nombre, email, password, foto_perfil, biografia, ubicacion });
     const res = await db.query(
             `INSERT INTO usuarios (
                 nombre,
@@ -67,11 +67,12 @@ const insertarUsuario = async (nombre, email, password, foto_perfil, biografia) 
                 biografia,
                 fecha_registro,
                 tipo_usuario,         
-                ultima_conexion
+                ultima_conexion,
+                ubicacion
             ) VALUES (
-                $1, $2, $3, $4, $5, NOW(), 'turista', NULL
+                $1, $2, $3, $4, $5, NOW(), 'turista', NULL, $6
             ) RETURNING *`,
-            [nombre, email, password, foto_perfil || null, biografia || null]
+            [nombre, email, password, foto_perfil || null, biografia || null, ubicacion || null]
         );
 
     return res.rows;
@@ -388,7 +389,7 @@ const getCategorias = async () => {
 
 const updateUsuarioPassword = async (id, hashedPassword) => {
     const res = await db.query(`
-        UPDATE usuarios SET password = $1 WHERE id_usuario = $2 RETURNING *`,
+        UPDATE usuarios SET password_hash = $1 WHERE id_usuario = $2 RETURNING *`,
         [hashedPassword, id]);
     return res.rows[0];
 };

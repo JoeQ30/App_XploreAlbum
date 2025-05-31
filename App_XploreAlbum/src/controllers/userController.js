@@ -1,4 +1,5 @@
-const db = require('../db'); 
+const db = require('../db');
+const bcrypt = require('bcrypt'); 
 
 const list = async (req, res, next) => {
     try {
@@ -86,7 +87,9 @@ const updateUser = async (req, res, next) => {
 const updateUserPassword = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { actualPass, newPassword } = req.body;
+        const { actualPassword, newPassword } = req.body;
+
+        console.log('[PASSWORD] Datos de actualización de contraseña:', { id, actualPassword, newPassword });
 
         // Verificar la contraseña actual
         const usuario = await db.getUsuarioByID(id);
@@ -94,7 +97,9 @@ const updateUserPassword = async (req, res, next) => {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
 
-        const isMatch = await bcrypt.compare(actualPass, usuario.password);
+        console.log('[PASSWORD] Usuario encontrado:', usuario);
+
+        const isMatch = await bcrypt.compare(actualPassword, usuario.password_hash);
         if (!isMatch) {
             return res.status(401).json({ error: 'Contraseña actual incorrecta' });
         }
@@ -103,10 +108,15 @@ const updateUserPassword = async (req, res, next) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
+        console.log('[PASSWORD] Guardando nueva contraseña...');
+
         const result = await db.updateUsuarioPassword(id, hashedPassword);
+        console.log('[PASSWORD] Resultado de la actualización:', result);
         if (!result) {
             return res.status(404).json({ error: 'No se encontró al usuario a actualizar' });
         }
+
+        console.log('[PASSWORD] Contraseña actualizada con éxito para el usuario:', id);
         return res.json(result);
     } catch (error) {
         next(error);

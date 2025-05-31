@@ -49,16 +49,21 @@ export const login = async (thisEmail, thisPassword) => {
   }
 };
 
-export const register = async (thisEmail, thisPassword, thisName) => {
+export const register = async (thisEmail, thisPassword, thisName, thisLocation) => {
   try {
-    console.log('Intentando registrar usuario con: \nnombre ->', thisName, '\nemail ->', thisEmail, '\npassword ->', thisPassword);
+    console.log('Intentando registrar usuario con: \nnombre ->', thisName, 
+      '\nemail ->', thisEmail, 
+      '\npassword ->', thisPassword, 
+      '\nubicación ->', thisLocation
+    );
 
     const response = await api.post('/auth/register_user', {
       nombre: thisName,
       email: thisEmail,
       password: thisPassword,
-      foto_perfil: null, 
-      biografia: null 
+      foto_perfil: null,
+      biografia: null,
+      ubicacion: thisLocation
     });
     //imprimir el JSON de respuesta
     const usuario = response.data;

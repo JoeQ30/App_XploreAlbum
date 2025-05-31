@@ -135,6 +135,7 @@ const ConfigurationScreen = () => {
       });
 
       if (nuevaContraseña && confirmarContraseña && contraseñaActual) {
+        console.log('[UPDATE PASSWORD] Actualizando contraseña... Desde:', contraseñaActual, ' -> a:', nuevaContraseña);
         const result = await actualizarPassword(loguedUser.id, nuevaContraseña, contraseñaActual);
         console.log('[UPDATE PASSWORD] Resultado:', result);
       }
