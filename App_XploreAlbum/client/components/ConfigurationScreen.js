@@ -17,7 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect  } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { actualizarUsuario } from '../services/api'; // Asegúrate de tener esta función en tu API
+import { actualizarUsuario, actualizarPassword } from '../services/api'; 
+import { normalizeUser } from '../utils/user';
 
 
 const ConfigurationScreen = () => {
@@ -134,16 +135,20 @@ const ConfigurationScreen = () => {
       });
 
       if (nuevaContraseña && confirmarContraseña && contraseñaActual) {
-        const result = await actualizarContraseña(loguedUser.id, nuevaContraseña, contraseñaActual);
+        const result = await actualizarPassword(loguedUser.id, nuevaContraseña, contraseñaActual);
         console.log('[UPDATE PASSWORD] Resultado:', result);
       }
 
       // Simular llamada a API
       await new Promise(resolve => setTimeout(resolve, 1000));
 
+      const normalizedUser = normalizeUser(updatedUser);
+
       // Guardar en AsyncStorage
-      await AsyncStorage.setItem('usuario', JSON.stringify(updatedUser));
-      setLoguedUser(updatedUser);
+      await AsyncStorage.setItem('usuario', JSON.stringify(normalizedUser));
+      setLoguedUser(normalizedUser);
+
+      console.log('[CONFIG]: Usuario actualizado:', normalizedUser);
 
       Alert.alert(
         'Éxito', 

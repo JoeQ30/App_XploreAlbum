@@ -24,6 +24,7 @@ const ProfileScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const loadUser = async () => {
+        console.log('[PROFILE]: useFocusEffect ejecutado');
         try {
           const jsonValue = await AsyncStorage.getItem('usuario');
           if (jsonValue != null) {

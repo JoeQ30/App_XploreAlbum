@@ -1,9 +1,12 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
+import { normalizeUser } from '../utils/user';
 
-const API_BASE_URL = 'http://192.168.7.241:3000'; 
 
-//const API_BASE_URL = 'http://192.168.1.28:3000';
+const PORT = 3000;
+const HOST = '192.168.1.28';
+
+const API_BASE_URL = `http://${HOST}:${PORT}`; 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,8 +16,9 @@ const api = axios.create({
 });
 
 export const guardarSesion = async (token, usuario) => {
+  const normalizedUser = normalizeUser(usuario);
   await AsyncStorage.setItem('token', token);
-  await AsyncStorage.setItem('usuario', JSON.stringify(usuario));
+  await AsyncStorage.setItem('usuario', JSON.stringify(normalizedUser));
 };
 
 export const login = async (thisEmail, thisPassword) => {
@@ -146,7 +150,7 @@ export const actualizarUsuario = async (id, data) => {
   try {
     const response = await api.put(`/users/${id}`, data);
     console.log('[UPDATE USER] Usuario actualizado:', response.data);
-    return response.data;
+    return response.data[0];
   }
   catch (error) {
     console.error('Error al actualizar usuario:', error);
@@ -156,11 +160,11 @@ export const actualizarUsuario = async (id, data) => {
 
 //router.put('/users/:id/password', userController.updateUserPassword);
 
-export const actualizarContraseña = async (id, thisNewPassword, thisActualPassword) => {
+export const actualizarPassword = async (id, thisNewPassword, thisActualPassword) => {
   try {
     const response = await api.put(`/users/${id}/password`, { actualPassword: thisActualPassword, newPassword: thisNewPassword });
     console.log('[UPDATE PASSWORD] Contraseña actualizada:', response.data);
-    return response.data;
+    return response.data[0];
   }
   catch (error) {
     console.error('Error al actualizar contraseña:', error);
