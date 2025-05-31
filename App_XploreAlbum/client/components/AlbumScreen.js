@@ -195,7 +195,9 @@ const AlbumScreen = () => {
     : coleccionables;
 
   const handleColeccionablePress = (coleccionable) => {
-    //TODO> Implementar navegación a detalle del coleccionable
+    console.log('[AlbumScreen] Coleccionable presionado:', coleccionable);
+    // Navegar a la pantalla de detalles del coleccionable
+    navigation.navigate('CollectDetail', { collectible: coleccionable });
   };
 
   const renderColeccionable = ({ item }) => (

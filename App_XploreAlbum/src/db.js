@@ -169,7 +169,13 @@ const updateUsuario = async (id, nombre, email, foto_perfil, biografia, visibili
 };
 
 
-
+const getLugarByID = async (idLugar) => {
+    const res = await db.query(
+        'SELECT * FROM lugares WHERE id_lugar = $1 AND activo = TRUE;',
+        [idLugar]
+    );
+    return res.rows[0];
+};
 
 const getLogrosByUsuario = async (id_usuario) => {
     const res = await db.query(`
@@ -443,6 +449,7 @@ module.exports = {
     setUltimaConexion,
     ListarLogrosById,
     updateUsuarioPassword,
+    getLugarByID,
     db,
 };
 

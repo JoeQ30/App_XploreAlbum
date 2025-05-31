@@ -177,4 +177,28 @@ export const actualizarPassword = async (id, thisNewPassword, thisActualPassword
   }
 } 
 
+//router.get('/places/:id/history', placeController.getHistory);
+export const obtenerHistoriaLugar = async (id) => {
+  try {
+    const response = await api.get(`/places/${id}/history`);
+    //console.log('[PLACE HISTORY] Datos Históricos recuperados:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener historial del lugar:', error);
+    throw new Error('Error al obtener historial del lugar');
+  }
+};
+
+//router.get('/places/:id', placeController.get);
+export const obtenerLugarPorId = async (id) => {
+  try {
+    const response = await api.get(`/places/${id}`);
+    //console.log('[PLACE DETAILS] Detalles del lugar recuperados:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener detalles del lugar:', error);
+    throw new Error('Error al obtener detalles del lugar');
+  }
+};
+
 export default api;

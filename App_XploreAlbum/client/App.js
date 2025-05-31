@@ -10,6 +10,7 @@ import UserProfile from './components/UserProfile';
 import SplashScreen from './components/SplashScreen'; 
 import RegisterScreen from './components/RegisterScreen';
 import ConfigurationScreen from './components/ConfigurationScreen';
+import CollectDetailScreen from './components/CollectDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +28,7 @@ export default function App() {
         <Stack.Screen name="Splash" component={SplashScreen} /> 
         <Stack.Screen name="Profile" component={UserProfile} />
         <Stack.Screen name="Configuration" component={ConfigurationScreen} />
-
+        <Stack.Screen name="CollectDetail" component={CollectDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
