@@ -8,14 +8,15 @@ import {
   FlatList, 
   StyleSheet,
   Dimensions,
-  Image
+  Image,
+  Modal
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect  } from '@react-navigation/native';
 import { listarColeccionables, listarFotos } from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = (width - 48) / 3; 
 
 // Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
@@ -55,6 +56,81 @@ const getColeccionableImage = (coleccionable, fotos) => {
   };
 };
 
+// Función para obtener la imagen de ejemplo del coleccionable bloqueado
+const getExampleImage = (coleccionable, fotos) => {
+  const fotoCorrespondiente = fotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
+  if (fotoCorrespondiente && imageMap[fotoCorrespondiente.ruta_imagen]) {
+    return imageMap[fotoCorrespondiente.ruta_imagen];
+  }
+  // Si no se encuentra la imagen específica, usar una imagen por defecto
+  return require('../assets/images/fotos_predeterminadas/default.jpg');
+};
+
+// Componente Modal para coleccionable bloqueado
+const LockedCollectibleModal = ({ visible, collectible, fotos, onClose, onUnlock }) => {
+  if (!collectible) return null;
+
+  const exampleImage = getExampleImage(collectible, fotos);
+
+  return (
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity 
+          style={styles.modalBackdrop} 
+          activeOpacity={1} 
+          onPress={onClose}
+        />
+        
+        <View style={styles.modalContent}>
+          {/* Ícono de candado */}
+          <View style={styles.lockIconContainer}>
+            <FontAwesome name="lock" size={40} color="#666" />
+          </View>
+          
+          {/* Título del coleccionable */}
+          <Text style={styles.modalTitle}>{collectible.nombre}</Text>
+          
+          {/* Mensaje */}
+          <Text style={styles.modalMessage}>
+            Para poder desbloquear este coleccionable, debes tomar una foto como esta
+          </Text>
+          
+          {/* Imagen de ejemplo */}
+          <View style={styles.exampleImageContainer}>
+            <Image 
+              source={exampleImage}
+              style={styles.exampleImage}
+              resizeMode="cover"
+            />
+          </View>
+          
+          {/* Botones */}
+          <View style={styles.modalButtons}>
+            <TouchableOpacity 
+              style={styles.unlockButton}
+              onPress={() => onUnlock(collectible)}
+            >
+              <Text style={styles.unlockButtonText}>Desbloquear</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={onClose}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 // Componente Coleccionable individual actualizado
 const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
   const imageInfo = getColeccionableImage(coleccionable, fotos);
@@ -63,7 +139,7 @@ const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
   // Descripción accesible del estado del coleccionable
   const accessibilityHint = isUnlocked 
     ? `Coleccionable desbloqueado. Toca para ver detalles de ${coleccionable.nombre}`
-    : `Coleccionable bloqueado. ${coleccionable.nombre} aún no ha sido desbloqueado`;
+    : `Coleccionable bloqueado. Toca para ver cómo desbloquear ${coleccionable.nombre}`;
   
   return (
     <TouchableOpacity 
@@ -73,7 +149,6 @@ const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
       accessibilityRole="button"
       accessibilityLabel={`Coleccionable ${coleccionable.nombre}`}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ disabled: !isUnlocked }}
     >
       <View 
         style={styles.coleccionableImageContainer}
@@ -150,6 +225,8 @@ const AlbumScreen = () => {
   const [coleccionables, setColeccionables] = useState([]);
   const [loguedUser, setLoguedUser] = useState(null);
   const [fotos, setFotos] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCollectible, setSelectedCollectible] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -196,8 +273,34 @@ const AlbumScreen = () => {
 
   const handleColeccionablePress = (coleccionable) => {
     //console.log('[AlbumScreen] Coleccionable presionado:', coleccionable);
-    // Navegar a la pantalla de detalles del coleccionable
-    navigation.navigate('CollectDetail', { collectible: coleccionable });
+    
+    if (coleccionable.desbloqueado) {
+      // Si está desbloqueado, navegar a la pantalla de detalles
+      navigation.navigate('CollectDetail', { collectible: coleccionable });
+    } else {
+      // Si está bloqueado, mostrar el modal
+      setSelectedCollectible(coleccionable);
+      setModalVisible(true);
+    }
+  };
+
+  const handleUnlock = (collectible) => {
+    //console.log('[AlbumScreen] Intentando desbloquear:', collectible);
+    // Cerrar el modal
+    setModalVisible(false);
+    setSelectedCollectible(null);
+    
+    // Aquí puedes navegar a la pantalla de cámara o implementar la lógica de desbloqueo
+    // Por ejemplo:
+    // navigation.navigate('Camera', { collectible });
+    
+    // Por ahora, solo mostramos un log
+    //console.log('Navegando a cámara para desbloquear:', collectible.nombre);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedCollectible(null);
   };
 
   const renderColeccionable = ({ item }) => (
@@ -307,6 +410,15 @@ const AlbumScreen = () => {
         accessible={true}
         accessibilityLabel="Lista de coleccionables"
         accessibilityHint="Desliza para ver más coleccionables"
+      />
+
+      {/* Modal para coleccionable bloqueado */}
+      <LockedCollectibleModal
+        visible={modalVisible}
+        collectible={selectedCollectible}
+        fotos={fotos}
+        onClose={handleCloseModal}
+        onUnlock={handleUnlock}
       />
     </View>
   );
@@ -443,7 +555,104 @@ const styles = StyleSheet.create({
   lockedTitle: {
     color: '#999',
   },
-  // Eliminamos los estilos del placeholder ya que ya no los usamos
+  // Estilos del Modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginHorizontal: 32,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  lockIconContainer: {
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  exampleImageContainer: {
+    width: 200,
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 24,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  exampleImage: {
+    width: '100%',
+    height: '100%',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+  },
+  unlockButton: {
+    flex: 1,
+    backgroundColor: '#8BC34A',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  unlockButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
+  },
   triangle: {
     display: 'none',
   },
