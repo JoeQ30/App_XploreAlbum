@@ -16,7 +16,7 @@ export default function LoginForm() {
   const handleLogin = async () => {
     try {
       const userData = await login(correo, contraseña);
-      console.log(correo, contraseña);
+      //console.log(correo, contraseña);
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
     
       navigation.navigate('Navigator');

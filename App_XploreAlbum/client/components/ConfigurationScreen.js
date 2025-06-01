@@ -135,9 +135,9 @@ const ConfigurationScreen = () => {
       });
 
       if (nuevaContraseña && confirmarContraseña && contraseñaActual) {
-        console.log('[UPDATE PASSWORD] Actualizando contraseña... Desde:', contraseñaActual, ' -> a:', nuevaContraseña);
+        //console.log('[UPDATE PASSWORD] Actualizando contraseña... Desde:', contraseñaActual, ' -> a:', nuevaContraseña);
         const result = await actualizarPassword(loguedUser.id, nuevaContraseña, contraseñaActual);
-        console.log('[UPDATE PASSWORD] Resultado:', result);
+        //console.log('[UPDATE PASSWORD] Resultado:', result);
       }
 
       // Simular llamada a API
@@ -149,7 +149,7 @@ const ConfigurationScreen = () => {
       await AsyncStorage.setItem('usuario', JSON.stringify(normalizedUser));
       setLoguedUser(normalizedUser);
 
-      console.log('[CONFIG]: Usuario actualizado:', normalizedUser);
+      //console.log('[CONFIG]: Usuario actualizado:', normalizedUser);
 
       Alert.alert(
         'Éxito', 

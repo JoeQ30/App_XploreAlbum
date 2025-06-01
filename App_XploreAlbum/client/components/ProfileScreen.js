@@ -24,12 +24,12 @@ const ProfileScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const loadUser = async () => {
-        console.log('[PROFILE]: useFocusEffect ejecutado');
+        //console.log('[PROFILE]: useFocusEffect ejecutado');
         try {
           const jsonValue = await AsyncStorage.getItem('usuario');
           if (jsonValue != null) {
             setLoguedUser(JSON.parse(jsonValue));
-            console.log('[PROFILE]: Usuario cargado:', JSON.parse(jsonValue));
+            //console.log('[PROFILE]: Usuario cargado:', JSON.parse(jsonValue));
           }
         } catch (e) {
           console.error('Error al cargar el usuario:', e);
@@ -43,7 +43,7 @@ const ProfileScreen = () => {
   const handleLogOut = async () => {
   try {
     await AsyncStorage.multiRemove(['usuario', 'token']);
-    console.log('[PROFILE]: Usuario desconectado');
+    //console.log('[PROFILE]: Usuario desconectado');
 
     // Redirigir y limpiar historial de navegación
     navigation.reset({

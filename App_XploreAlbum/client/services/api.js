@@ -23,8 +23,7 @@ export const guardarSesion = async (token, usuario) => {
 
 export const login = async (thisEmail, thisPassword) => {
   try {
-
-    console.log('Intentando iniciar sesión con:', thisEmail, thisPassword);
+    //console.log('Intentando iniciar sesión con:', thisEmail, thisPassword);
 
     if (!thisEmail || !thisPassword) {
       throw new Error('Por favor, ingresa tu correo y contraseña');
@@ -51,11 +50,11 @@ export const login = async (thisEmail, thisPassword) => {
 
 export const register = async (thisEmail, thisPassword, thisName, thisLocation) => {
   try {
-    console.log('Intentando registrar usuario con: \nnombre ->', thisName, 
-      '\nemail ->', thisEmail, 
-      '\npassword ->', thisPassword, 
-      '\nubicación ->', thisLocation
-    );
+    //console.log('Intentando registrar usuario con: \nnombre ->', thisName, 
+    //  '\nemail ->', thisEmail, 
+    //  '\npassword ->', thisPassword, 
+    //  '\nubicación ->', thisLocation
+    //);
 
     const response = await api.post('/auth/register_user', {
       nombre: thisName,
@@ -67,7 +66,7 @@ export const register = async (thisEmail, thisPassword, thisName, thisLocation) 
     });
     //imprimir el JSON de respuesta
     const usuario = response.data;
-    console.log('--------------\n[REGISTER] Respuesta del servidor:', usuario, '\n--------------');
+    //console.log('--------------\n[REGISTER] Respuesta del servidor:', usuario, '\n--------------');
 
     return usuario;
   } catch (error) {
@@ -154,7 +153,7 @@ export const listarFotos = async () => {
 export const actualizarUsuario = async (id, data) => {
   try {
     const response = await api.put(`/users/${id}`, data);
-    console.log('[UPDATE USER] Usuario actualizado:', response.data);
+    //console.log('[UPDATE USER] Usuario actualizado:', response.data);
     return response.data[0];
   }
   catch (error) {
@@ -168,7 +167,7 @@ export const actualizarUsuario = async (id, data) => {
 export const actualizarPassword = async (id, thisNewPassword, thisActualPassword) => {
   try {
     const response = await api.put(`/users/${id}/password`, { actualPassword: thisActualPassword, newPassword: thisNewPassword });
-    console.log('[UPDATE PASSWORD] Contraseña actualizada:', response.data);
+    //console.log('[UPDATE PASSWORD] Contraseña actualizada:', response.data);
     return response.data[0];
   }
   catch (error) {

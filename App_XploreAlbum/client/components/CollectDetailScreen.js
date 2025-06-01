@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,19 @@ import {
   StyleSheet,
   StatusBar,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { obtenerHistoriaLugar, obtenerLugarPorId } from '../services/api';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-//App_XploreAlbum\client\assets\images\fotos_predeterminadas\edificio_metalico.jpg
+// Constantes para la animación
+const HEADER_MAX_HEIGHT = screenHeight * 0.4;
+const HEADER_MIN_HEIGHT = 100;
+const HEADER_SCROLL_DISTANCE = HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT;
 
 // Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
 const imageMap = {
@@ -37,28 +42,31 @@ const CollectDetailScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [storyData, setStoryData] = useState([]);
   const [placeData, setPlaceData] = useState({});
+  
+  // Ref para la animación del scroll
+  const scrollOffsetY = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     React.useCallback(() => {
       
       const loadCollectibleData = async () => {
         try {
-            console.log('--------------------------------------------------');
+            //console.log('--------------------------------------------------');
             setLoading(true);
             // Carga el coleccionable desde la ruta
             const { collectible } = route.params || {};
             setCollectibleData(collectible || {});
 
-            console.log('[CollectDetail] Collectible data:', collectible);
+            //console.log('[CollectDetail] Collectible data:', collectible);
             
             // Accede a los datos del usuario logueado en async storage
             const userData = await AsyncStorage.getItem('usuario');
             if (userData) {
                 const parsedUserData = JSON.parse(userData);
                 setLoguedUser(parsedUserData);
-                console.log('Logued user data:', parsedUserData);
+                //console.log('Logued user data:', parsedUserData);
             }else {
-                console.log('[CollectDetail] No se pudo obtener el usuario logueado');
+                console.error('[CollectDetail] No se pudo obtener el usuario logueado');
                 setLoguedUser(null);
                 }
 
@@ -72,7 +80,7 @@ const CollectDetailScreen = ({ navigation, route }) => {
             const lugar = await obtenerLugarPorId(placeId);
             if (lugar) {
                 setPlaceData(lugar);
-                console.log('[CollectDetail] Lugar data:', lugar);
+                //console.log('[CollectDetail] Lugar data:', lugar);
             } else {
                 console.error('[CollectDetail] No se encontraron datos del lugar');
             }
@@ -81,7 +89,7 @@ const CollectDetailScreen = ({ navigation, route }) => {
             const historia = await obtenerHistoriaLugar(placeId);
             if (historia) {
                 setStoryData(historia);
-                console.log('[CollectDetail] Historia del lugar:', historia);
+                //console.log('[CollectDetail] Historia del lugar:', historia);
             } else {
                 console.error('[CollectDetail] No se encontraron datos de la historia del lugar');
             }
@@ -102,6 +110,37 @@ const CollectDetailScreen = ({ navigation, route }) => {
     navigation.goBack();
   };
 
+  // Animaciones basadas en el scroll
+  const headerHeight = scrollOffsetY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
+  const imageOpacity = scrollOffsetY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.5, 0],
+    extrapolate: 'clamp',
+  });
+
+  const imageTranslateY = scrollOffsetY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [0, -50],
+    extrapolate: 'clamp',
+  });
+
+  const titleOpacity = scrollOffsetY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE / 2, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 1, 1],
+    extrapolate: 'clamp',
+  });
+
+  const titleScale = scrollOffsetY.interpolate({
+    inputRange: [0, HEADER_SCROLL_DISTANCE],
+    outputRange: [1, 0.8],
+    extrapolate: 'clamp',
+  });
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -114,10 +153,18 @@ const CollectDetailScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
-      {/* Header con imagen de fondo */}
-      <View style={styles.headerContainer}>
+      {/* Header animado con imagen de fondo */}
+      <Animated.View style={[styles.headerContainer, { height: headerHeight }]}>
         {/* Imagen de fondo del lugar */}
-        <View style={styles.backgroundImage}>
+        <Animated.View 
+          style={[
+            styles.backgroundImage,
+            {
+              opacity: imageOpacity,
+              transform: [{ translateY: imageTranslateY }],
+            }
+          ]}
+        >
           {placeData.imagen_principal ? (
             <Image 
               source={imageMap[placeData.imagen_principal]} 
@@ -127,18 +174,40 @@ const CollectDetailScreen = ({ navigation, route }) => {
           ) : (
             <View style={styles.placeholderImage} />
           )}
-        </View>
+        </Animated.View>
         
-        {/* Overlay oscuro */}
-        <View style={styles.overlay} />
+        {/* Overlay oscuro animado */}
+        <Animated.View 
+          style={[
+            styles.overlay,
+            {
+              opacity: imageOpacity,
+              transform: [{ translateY: imageTranslateY }],
+            }
+          ]} 
+        />
         
         {/* Botón de regreso */}
-        <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
-          <Text style={styles.backButtonText}>←</Text>
+        <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            accessible={true}
+            style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="Volver atrás"
+            accessibilityHint="Toca para regresar a la pantalla anterior"
+        >
+            <Icon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         
-        {/* Información del lugar en el header */}
-        <View style={styles.headerInfo}>
+        <Animated.View 
+          style={[
+            styles.headerInfo,
+            {
+              opacity: titleOpacity,
+              transform: [{ scale: titleScale }],
+            }
+          ]}
+        >
           <View style={styles.titleContainer}>
             <Text style={styles.logoText}>
                 <Image 
@@ -150,17 +219,26 @@ const CollectDetailScreen = ({ navigation, route }) => {
             <Text style={styles.placeName}>{placeData.nombre}</Text>
           </View>
           <Text style={styles.placeLocation}>{placeData.ubicacion}</Text>
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
 
       {/* Contenido scrolleable */}
-      <ScrollView 
+      <Animated.ScrollView 
         style={styles.contentContainer}
+        contentContainerStyle={{ paddingTop: HEADER_MAX_HEIGHT }}
         showsVerticalScrollIndicator={false}
         bounces={false}
-      >
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollOffsetY } } }],
+          { useNativeDriver: false }
+        )}
+      >        
         <View style={styles.descriptionContainer}>
           {/* Descripción del lugar */}
+          <Text style={styles.historyTitle}>
+            Descripción
+          </Text>
           <Text style={styles.descriptionText}>
             {placeData.descripcion}
           </Text>
@@ -180,7 +258,7 @@ const CollectDetailScreen = ({ navigation, route }) => {
         
         {/* Espaciado adicional al final */}
         <View style={styles.bottomSpacing} />
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Indicador inferior */}
       <View style={styles.bottomIndicator}>
@@ -206,8 +284,11 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   headerContainer: {
-    height: screenHeight * 0.4,
-    position: 'relative',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
     justifyContent: 'flex-end',
   },
   backgroundImage: {
@@ -243,6 +324,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 20,
+    zIndex: 1001,
   },
   backButtonText: {
     color: 'white',
@@ -322,7 +404,23 @@ const styles = StyleSheet.create({
   bottomSpacing: {
     height: 100,
   },
-  bottomIndicator: {
+  bottomGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    backgroundColor: 'transparent',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    // Simulamos un gradiente con multiple sombras
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 5,
+  },
+  position: {
     position: 'absolute',
     bottom: 20,
     left: 0,

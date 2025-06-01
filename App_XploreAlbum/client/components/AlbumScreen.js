@@ -155,7 +155,7 @@ const AlbumScreen = () => {
     useCallback(() => {
       const fetchColeccionables = async () => {
         try {
-          console.log('[AlbumScreen] Cargando usuario...');
+          //console.log('[AlbumScreen] Cargando usuario...');
           const jsonValue = await AsyncStorage.getItem('usuario');
           const usuario = JSON.parse(jsonValue);
           
@@ -166,7 +166,7 @@ const AlbumScreen = () => {
           }
           
           setLoguedUser(usuario);
-          console.log('[AlbumScreen] Usuario logueado:', usuario);
+          //console.log('[AlbumScreen] Usuario logueado:', usuario);
 
           const dataColectibles = await listarColeccionables(usuario.id);
           setColeccionables(dataColectibles);
@@ -195,7 +195,7 @@ const AlbumScreen = () => {
     : coleccionables;
 
   const handleColeccionablePress = (coleccionable) => {
-    console.log('[AlbumScreen] Coleccionable presionado:', coleccionable);
+    //console.log('[AlbumScreen] Coleccionable presionado:', coleccionable);
     // Navegar a la pantalla de detalles del coleccionable
     navigation.navigate('CollectDetail', { collectible: coleccionable });
   };
