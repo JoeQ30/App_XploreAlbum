@@ -154,6 +154,7 @@ const setUltimaConexion = async (id) => {
 
 
 const updateUsuario = async (id, nombre, email, foto_perfil, biografia, visibilidad_perfil) => {
+    console.log('[UPDATE USER] Datos de actualización:', { id, nombre, email, foto_perfil, biografia, visibilidad_perfil });
     const res = await db.query(
         `UPDATE usuarios SET 
             nombre = $1,
@@ -164,6 +165,8 @@ const updateUsuario = async (id, nombre, email, foto_perfil, biografia, visibili
         WHERE id_usuario = $6 RETURNING *`,
         [nombre, email, foto_perfil || null, biografia || null, visibilidad_perfil, id]
     );
+
+    console.log('[UPDATE USER] Usuario actualizado:', res.rows[0]);
 
     return res.rows;
 };
@@ -285,6 +288,16 @@ const getColeccionablesByUsuario = async (id_usuario) => {
     return res.rows;
 };
 
+const getCantidadColeccionablesDesbloqueados = async (id_usuario) => {
+  const res = await db.query(`
+    SELECT COUNT(*) AS cantidad
+    FROM usuario_coleccionables
+    WHERE id_usuario = $1
+  `, [id_usuario]);
+
+  return parseInt(res.rows[0].cantidad, 10);
+};
+
 const seguirUsuario = async (id_seguidor, id_seguido) => {
     const res = await db.query(`
         INSERT INTO seguimientos (id_seguidor, id_seguido)
@@ -313,6 +326,28 @@ const getSeguidos = async (id_usuario) => {
         JOIN seguimientos s ON u.id_usuario = s.id_seguido
         WHERE s.id_seguidor = $1`, [id_usuario]);
     return res.rows;
+};
+
+const getSeguidoresCount = async (id_usuario) => {
+    const res = await db.query(`
+        SELECT COUNT(*) AS count FROM seguimientos WHERE id_seguido = $1`, [id_usuario]);
+    return parseInt(res.rows[0].count, 10);
+};
+
+const getSeguidosCount = async (id_usuario) => {
+    const res = await db.query(`
+        SELECT COUNT(*) AS count FROM seguimientos WHERE id_seguidor = $1`, [id_usuario]);
+    return parseInt(res.rows[0].count, 10);
+};
+
+const isFollowing = async (id_seguidor, id_seguido) => {
+  const res = await db.query(`
+    SELECT COUNT(*) AS count 
+    FROM seguimientos 
+    WHERE id_seguidor = $1 AND id_seguido = $2
+  `, [id_seguidor, id_seguido]);
+
+  return parseInt(res.rows[0].count, 10) > 0;
 };
 
 const validarProximidad = async (lat, lon, id_lugar) => {
@@ -450,6 +485,10 @@ module.exports = {
     ListarLogrosById,
     updateUsuarioPassword,
     getLugarByID,
+    getSeguidoresCount,
+    getSeguidosCount,
+    isFollowing,
+    getCantidadColeccionablesDesbloqueados,
     db,
 };
 

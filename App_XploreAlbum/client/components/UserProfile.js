@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,20 +12,49 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AchievementItem from './Items/AchievementItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { 
+  obtenerCantidadColeccionablesDesbloqueados, 
+  obtenerCantidadSeguidores, 
+  obtenerCantidadSeguidos 
+} from '../services/api';
 
 const UserProfile = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const route = useRoute();
   const [user, setUser] = useState(null);
+  const [seguidores, setSeguidores] = useState(0);
+  const [siguiendo, setSiguiendo] = useState(0);
+  const [desbloqueables, setDesbloqueables] = useState(0);
 
   // Datos del usuario que viene de la navegación o estado local
-  useEffect(() => {
-    if (route.params?.user) {
-      setUser(route.params.user);
-    }
-  }, [route.params?.user]);
+  useFocusEffect(
+  React.useCallback(() => {
+    const loadUserData = async () => {
+      try {
+        if (route.params?.user) {
+          const user = route.params.user;
+          setUser(user);
+
+          const id = user.id_usuario; // Asegurate de usar el nombre correcto del campo
+
+          const seguidoresValue = await obtenerCantidadSeguidores(id);
+          const siguiendoValue = await obtenerCantidadSeguidos(id);
+          const desbloqueablesValue = await obtenerCantidadColeccionablesDesbloqueados(id);
+
+          setSeguidores(seguidoresValue);
+          setSiguiendo(siguiendoValue);
+          setDesbloqueables(desbloqueablesValue);
+        }
+      } catch (e) {
+        console.error('Error al cargar datos del usuario:', e);
+      }
+    };
+
+    loadUserData();
+  }, [route.params?.user])
+);
 
   const achievements = [
     {
@@ -140,12 +169,90 @@ const UserProfile = () => {
           </Text>
         </View>
 
+        {/* Social Stats Section */}
+        <View 
+          style={styles.socialStatsContainer}
+          accessible={true}
+          accessibilityLabel="Estadísticas sociales del usuario"
+        >
+          <TouchableOpacity 
+            style={styles.socialStatItem}
+            onPress={() => navigation.navigate('UserFollowers', { userId: user?.id })}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Seguidores: ${seguidores || 0}`}
+            accessibilityHint="Toca para ver la lista de seguidores"
+          >
+            <Text style={styles.socialStatNumber}>
+              {seguidores || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Seguidores</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.socialStatDivider} />
+          
+          <TouchableOpacity 
+            style={styles.socialStatItem}
+            onPress={() => navigation.navigate('UserFollowing', { userId: user?.id })}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Siguiendo: ${siguiendo || 0}`}
+            accessibilityHint="Toca para ver la lista de usuarios que sigue"
+          >
+            <Text style={styles.socialStatNumber}>
+              {siguiendo || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Siguiendo</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.socialStatDivider} />
+          
+          <View 
+            style={styles.socialStatItem}
+            accessible={true}
+            accessibilityLabel={`Coleccionables desbloqueados: ${desbloqueables || 0}`}
+          >
+            <Text style={styles.socialStatNumber}>
+              {desbloqueables || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Coleccionables</Text>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View 
+          style={styles.actionButtonsContainer}
+          accessible={true}
+          accessibilityLabel="Botones de acción para el usuario"
+        >
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.followButton]}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Seguir usuario"
+            accessibilityHint="Toca para seguir a este usuario"
+          >
+            <Icon name="person-add" size={20} color="white" />
+            <Text style={styles.followButtonText}>Seguir</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.collectButton]}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Coleccionables"
+            accessibilityHint="Toca para ver los coleccionables de este usuario"
+          >
+            <Icon name="stars" size={20} color="#8BC34A" />
+            <Text style={styles.collectButtonText}>Coleccionables</Text>
+          </TouchableOpacity>
+        </View>
+
         {/* Información del usuario */}
         <View 
           style={styles.profileForm}
           accessible={true}
           accessibilityLabel="Información detallada del usuario"
-          accessibilityRole="group"
         >
           <View 
             style={styles.infoRow}
@@ -172,7 +279,7 @@ const UserProfile = () => {
             accessibilityRole="text"
           >
             <Icon 
-              name="info" 
+              name="3p" 
               size={20} 
               color="#666" 
               style={styles.infoIcon}
@@ -207,7 +314,6 @@ const UserProfile = () => {
           style={styles.section}
           accessible={true}
           accessibilityLabel="Sección de logros del usuario"
-          accessibilityRole="group"
         >
           <View style={styles.sectionHeader}>
             <Text 
@@ -223,14 +329,12 @@ const UserProfile = () => {
             style={styles.achievementsContainer}
             accessible={true}
             accessibilityLabel={`Lista de logros: ${achievements.length} logros disponibles`}
-            accessibilityRole="list"
           >
             {achievements.map((achievement, index) => (
               <View
                 key={achievement.id}
                 accessible={true}
                 accessibilityLabel={`Logro ${index + 1} de ${achievements.length}: ${achievement.title}. ${achievement.description}`}
-                accessibilityRole="listitem"
               >
                 <AchievementItem
                   icon={achievement.icon}
@@ -240,71 +344,6 @@ const UserProfile = () => {
                 />
               </View>
             ))}
-          </View>
-        </View>
-
-        {/* Statistics Section */}
-        <View 
-          style={styles.section}
-          accessible={true}
-          accessibilityLabel="Sección de estadísticas del usuario"
-          accessibilityRole="group"
-        >
-          <View style={styles.sectionHeader}>
-            <Text 
-              style={styles.sectionTitle}
-              accessible={true}
-              accessibilityRole="header"
-              accessibilityLabel="Estadísticas de progreso"
-            >
-              Estadísticas
-            </Text>
-          </View>
-          <View 
-            style={styles.statisticsContainer}
-            accessible={true}
-            accessibilityLabel="Información de estadísticas"
-            accessibilityRole="group"
-          >
-            <View 
-              style={styles.statisticItem}
-              accessible={true}
-              accessibilityLabel="Progreso de descubrimiento: Ha descubierto 16 de 30 lugares"
-              accessibilityRole="progressbar"
-              accessibilityValue={{ min: 0, max: 30, now: 16 }}
-            >
-              <View 
-                style={styles.chartIcon}
-                accessible={true}
-                accessibilityLabel="Icono de tendencia ascendente"
-                accessibilityRole="image"
-              >
-                <Icon 
-                  name="trending-up" 
-                  size={30} 
-                  color="#8BC34A"
-                  accessible={false}
-                />
-              </View>
-              <View style={styles.statisticInfo}>
-                <Text 
-                  style={styles.statisticTitle}
-                  accessible={true}
-                  accessibilityRole="text"
-                  accessibilityLabel="Título de estadística: Progreso"
-                >
-                  Progreso
-                </Text>
-                <Text 
-                  style={styles.statisticDescription}
-                  accessible={true}
-                  accessibilityRole="text"
-                  accessibilityLabel="Descripción: Ha descubierto 16 de 30 lugares disponibles"
-                >
-                  Ha descubierto 16 de 30 lugares
-                </Text>
-              </View>
-            </View>
           </View>
         </View>
       </ScrollView>
@@ -367,6 +406,87 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginBottom: 20,
+  },
+  // Nuevos estilos para las estadísticas sociales
+  socialStatsContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    borderRadius: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  socialStatItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+  },
+  socialStatNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  socialStatLabel: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  socialStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 5,
+  },
+  // Nuevos estilos para los botones de acción
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 15,
+    marginBottom: 20,
+    gap: 10,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+  },
+  followButton: {
+    backgroundColor: '#8BC34A',
+  },
+  collectButton: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#8BC34A',
+  },
+  followButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  collectButtonText: {
+    color: '#8BC34A',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   profileForm: {
     backgroundColor: 'white',

@@ -43,6 +43,10 @@ router.post('/users/:id/follow', followController.follow);
 router.delete('/users/:id/unfollow', followController.unfollow);
 router.get('/users/:id/followers', followController.getFollowers);
 router.get('/users/:id/following', followController.getFollowing);
+router.get('/users/:id/following/count', followController.getFollowingCount);
+router.get('/users/:id/followers/count', followController.getFollowersCount);
+router.get('/users/:id/isFollowing', followController.isFollowing);
+
 
 // -------- Lugares y categorías --------
 router.get('/places', placeController.list);
@@ -74,6 +78,7 @@ router.get('/users/:id/achievements', achievementController.getByUser);
 // -------- Coleccionables --------
 router.get('/collectibles', collectibleController.list);
 router.get('/users/:id/collectibles', collectibleController.getByUser);
+router.get('/users/:id/collectibles/count', collectibleController.getCantColeccionablesDesbloqueados);
 
 // -------- Ubicación y visitas --------
 router.post('/locations/validate', locationController.validateLocation);

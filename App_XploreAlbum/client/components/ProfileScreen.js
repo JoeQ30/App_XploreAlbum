@@ -15,21 +15,40 @@ import AchievementItem from './Items/AchievementItem';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { 
+  obtenerCantidadColeccionablesDesbloqueados, 
+  obtenerCantidadSeguidores, 
+  obtenerCantidadSeguidos,
+  obtenerUsuarioPorId
+} from '../services/api';
 
 const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [loguedUser, setLoguedUser] = useState(null);
+  const [seguidores, setSeguidores] = useState(0);
+  const [siguiendo, setSiguiendo] = useState(0);
+  const [desbloqueables, setDesbloqueables] = useState(0);
 
   useFocusEffect(
     React.useCallback(() => {
       const loadUser = async () => {
-        //console.log('[PROFILE]: useFocusEffect ejecutado');
         try {
           const jsonValue = await AsyncStorage.getItem('usuario');
           if (jsonValue != null) {
-            setLoguedUser(JSON.parse(jsonValue));
-            //console.log('[PROFILE]: Usuario cargado:', JSON.parse(jsonValue));
+            const parsedUser = JSON.parse(jsonValue);
+            setLoguedUser(parsedUser);
+            console.log('Usuario cargado:', parsedUser);
+
+            const id = parsedUser.id;
+            const seguidoresValue = await obtenerCantidadSeguidores(id);
+            const siguiendoValue = await obtenerCantidadSeguidos(id);
+            const desbloqueablesValue = await obtenerCantidadColeccionablesDesbloqueados(id);
+
+            setSeguidores(seguidoresValue);
+            setSiguiendo(siguiendoValue);
+            setDesbloqueables(desbloqueablesValue);
+
           }
         } catch (e) {
           console.error('Error al cargar el usuario:', e);
@@ -39,6 +58,7 @@ const ProfileScreen = () => {
       loadUser();
     }, [])
   );
+
 
   const handleLogOut = async () => {
   try {
@@ -71,6 +91,8 @@ const ProfileScreen = () => {
       iconBg: '#FFF3E0',
     },
   ];
+
+  const memberSince = loguedUser?.fecha_registro?.slice(0, 4) || 'Año no disponible';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -172,6 +194,72 @@ const ProfileScreen = () => {
           >
             <Icon name="person" size={60} color="#666" />
           </View>
+          <Text 
+            style={styles.userName}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Nombre de usuario: ${loguedUser?.nombre || 'Usuario'}`}
+          >
+            {loguedUser?.nombre || 'Usuario'}
+          </Text>
+          <Text 
+            style={styles.userLocation}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Ubicación: ${loguedUser?.ubicacion || 'Ubicación no especificada'}`}
+          >
+            {loguedUser?.ubicacion || 'Ubicación no especificada'}
+          </Text>
+        </View>
+
+        {/* Followers and Following Section */}
+        <View 
+          style={styles.socialStatsContainer}
+          accessible={true}
+          accessibilityLabel="Estadísticas sociales del usuario"
+        >
+          <TouchableOpacity 
+            style={styles.socialStatItem}
+            onPress={() => navigation.navigate('Followers')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Seguidores: ${seguidores || 0}`}
+            accessibilityHint="Toca para ver la lista de seguidores"
+          >
+            <Text style={styles.socialStatNumber}>
+              {seguidores || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Seguidores</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.socialStatDivider} />
+          
+          <TouchableOpacity 
+            style={styles.socialStatItem}
+            onPress={() => navigation.navigate('Following')}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel={`Siguiendo: ${siguiendo || 0}`}
+            accessibilityHint="Toca para ver la lista de usuarios que sigues"
+          >
+            <Text style={styles.socialStatNumber}>
+              {siguiendo || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Siguiendo</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.socialStatDivider} />
+          
+          <View 
+            style={styles.socialStatItem}
+            accessible={true}
+            accessibilityLabel={`Coleccionables desbloqueados: ${desbloqueables || 0}`}
+          >
+            <Text style={styles.socialStatNumber}>
+              {desbloqueables || 0}
+            </Text>
+            <Text style={styles.socialStatLabel}>Coleccionables</Text>
+          </View>
         </View>
 
          {/* Información del usuario */}
@@ -181,43 +269,56 @@ const ProfileScreen = () => {
           accessibilityLabel="Información del perfil del usuario"
         >
           <View 
-            style={styles.inputContainer}
+            style={styles.infoRow}
             accessible={true}
             accessibilityRole="text"
-            accessibilityLabel={`Nombre de usuario: ${loguedUser?.nombre || 'Nombre de usuario'}`}
+            accessibilityLabel={`Correo electrónico: ${loguedUser?.correo || 'Correo no disponible'}`}
           >
-            <Text style={styles.input}>
-              {loguedUser?.nombre || 'Nombre de usuario'}
+            <Icon 
+              name="email" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
+            <Text style={styles.infoText}>
+              {loguedUser?.correo || 'Correo no disponible'}
             </Text>
           </View>
+          
           <View 
-            style={styles.inputContainer}
-            accessible={true}
-            accessibilityRole="text"
-            accessibilityLabel={`Correo electrónico: ${loguedUser?.correo || 'Nombre y Apellidos'}`}
-          >
-            <Text style={styles.input}>
-              {loguedUser?.correo || 'Nombre y Apellidos'}
-            </Text>
-          </View>
-          <View 
-            style={styles.inputContainer}
+            style={styles.infoRow}
             accessible={true}
             accessibilityRole="text"
             accessibilityLabel={`Biografía: ${loguedUser?.biografia || 'Soy nuevo en la app, ¡encantado de conocerte!'}`}
           >
-            <Text style={styles.input}>
+            <Icon 
+              name="3p" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
+            <Text style={styles.infoText}>
               {loguedUser?.biografia || 'Soy nuevo en la app, ¡encantado de conocerte!'}
             </Text>
           </View>
+          
           <View 
-            style={styles.inputContainer}
+            style={styles.infoRow}
             accessible={true}
             accessibilityRole="text"
-            accessibilityLabel={`Año de registro: ${loguedUser?.fecha_registro?.slice(0, 4) || 'No disponible'}`}
+            accessibilityLabel={`Miembro desde el año ${memberSince}`}
           >
-            <Text style={styles.input}>
-              {"Año de Registro: " + (loguedUser?.fecha_registro?.slice(0, 4) || 'No disponible')}
+            <Icon 
+              name="calendar-today" 
+              size={20} 
+              color="#666" 
+              style={styles.infoIcon}
+              accessible={false}
+            />
+            <Text style={styles.infoText}>
+              Miembro desde: {memberSince}
             </Text>
           </View>
         </View>
@@ -240,7 +341,7 @@ const ProfileScreen = () => {
               accessibilityRole="header"
               accessibilityLabel="Título: Logros"
             >
-              Logros 
+              Logros 🏆
             </Text>
             <TouchableOpacity 
               onPress={() => navigation.navigate('Achievements')}
@@ -274,74 +375,6 @@ const ProfileScreen = () => {
           </View>
         </View>
 
-        {/* Statistics Section */}
-        <View 
-          style={styles.section}
-          accessible={true}
-          accessibilityLabel="Sección de estadísticas del usuario"
-        >
-          <View 
-            style={styles.sectionHeader}
-            accessible={true}
-            accessibilityRole="header"
-            accessibilityLabel="Encabezado de la sección de estadísticas"
-          >
-            <Text 
-              style={styles.sectionTitle}
-              accessible={true}
-              accessibilityRole="header"
-              accessibilityLabel="Título: Estadísticas"
-            >
-              Estadísticas
-            </Text>
-            <TouchableOpacity
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Ver más estadísticas"
-              accessibilityHint="Toca para ver estadísticas detalladas"
-            >
-              <Icon name="keyboard-arrow-right" size={24} color="#8BC34A" />
-            </TouchableOpacity>
-          </View>
-          <View 
-            style={styles.statisticsContainer}
-            accessible={true}
-            accessibilityLabel="Contenedor de estadísticas"
-          >
-            <View 
-              style={styles.statisticItem}
-              accessible={true}
-              accessibilityRole="summary"
-              accessibilityLabel="Progreso: Has descubierto 16 de 30 lugares"
-            >
-              <View 
-                style={styles.chartIcon}
-                accessible={true}
-                accessibilityLabel="Icono de gráfico de tendencia ascendente"
-              >
-                <Icon name="trending-up" size={30} color="#8BC34A" />
-              </View>
-              <View style={styles.statisticInfo}>
-                <Text 
-                  style={styles.statisticTitle}
-                  accessible={true}
-                  accessibilityRole="header"
-                  accessibilityLabel="Título de estadística: Progreso"
-                >
-                  Progreso
-                </Text>
-                <Text 
-                  style={styles.statisticDescription}
-                  accessible={true}
-                  accessibilityRole="text"
-                  accessibilityLabel="Descripción: Has descubierto 16 de 30 lugares"
-                >
-                  Has descubierto 16 de 30 lugares
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -391,7 +424,7 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: 25,
   },
   avatar: {
     width: 120,
@@ -400,6 +433,58 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 15,
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  userLocation: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  // Nuevos estilos para las estadísticas sociales
+  socialStatsContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    marginHorizontal: 15,
+    borderRadius: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  socialStatItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+  },
+  socialStatNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  socialStatLabel: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  socialStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#E0E0E0',
+    marginHorizontal: 5,
   },
   profileForm: {
     backgroundColor: 'white',
@@ -413,15 +498,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  inputContainer: {
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 15,
   },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingVertical: 10,
+  infoIcon: {
+    marginRight: 10,
+  },
+  infoText: {
     fontSize: 16,
     color: '#333',
+    flex: 1,
   },
   section: {
     marginHorizontal: 15,
