@@ -19,7 +19,7 @@ const adminController = require('../controllers/adminController');
 const iaRoutes = require('./iaRoutes');
 
 // -------- IA y Reconocimiento de Imágenes --------
-router.use('/ai', iaRoutes);
+router.use('/ia', iaRoutes);
 
 
 
