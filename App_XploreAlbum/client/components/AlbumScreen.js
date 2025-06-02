@@ -19,6 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = (width - 48) / 3; 
 
+//App_XploreAlbum\client\assets\images\ejemplos\edificio-metalico.jpg
+
 // Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
 const imageMap = {
   'collect/basilica.png': require('../assets/images/collect/basilica.png'),
@@ -32,6 +34,21 @@ const imageMap = {
   'collect/ruinas-ujarras.png': require('../assets/images/collect/ruinas-ujarras.png'),
   'collect/rio-celeste.png': require('../assets/images/collect/rio-celeste.png'),
 };
+
+// Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
+const imageEjMap = {
+  'collect/basilica.png': require('../assets/images/ejemplos/basilica.jpg'),
+  'collect/chirripo.png': require('../assets/images/ejemplos/chirripo.jpg'),
+  'collect/corcovado.png': require('../assets/images/ejemplos/corcovado.jpg'),
+  'collect/edificio-metalico.png': require('../assets/images/ejemplos/edificio-metalico.jpg'),
+  'collect/teatro-nacional.png': require('../assets/images/ejemplos/teatro-nacional.jpg'),
+  'collect/fortin.png': require('../assets/images/ejemplos/fortin.jpg'),
+  'collect/melico-salazar.png': require('../assets/images/ejemplos/melico-salazar.jpg'),
+  'collect/monteverde.png': require('../assets/images/ejemplos/monteverde.jpg'),
+  'collect/ruinas-ujarras.png': require('../assets/images/ejemplos/ruinas-ujarras.jpg'),
+  'collect/rio-celeste.png': require('../assets/images/ejemplos/rio-celeste.jpg'),
+};
+
 
 // Función para obtener la imagen correcta del coleccionable
 const getColeccionableImage = (coleccionable, fotos) => {
@@ -59,8 +76,8 @@ const getColeccionableImage = (coleccionable, fotos) => {
 // Función para obtener la imagen de ejemplo del coleccionable bloqueado
 const getExampleImage = (coleccionable, fotos) => {
   const fotoCorrespondiente = fotos.find(foto => foto.id_lugar === coleccionable.id_lugar);
-  if (fotoCorrespondiente && imageMap[fotoCorrespondiente.ruta_imagen]) {
-    return imageMap[fotoCorrespondiente.ruta_imagen];
+  if (fotoCorrespondiente && imageEjMap[fotoCorrespondiente.ruta_imagen]) {
+    return imageEjMap[fotoCorrespondiente.ruta_imagen];
   }
   // Si no se encuentra la imagen específica, usar una imagen por defecto
   return require('../assets/images/fotos_predeterminadas/default.jpg');

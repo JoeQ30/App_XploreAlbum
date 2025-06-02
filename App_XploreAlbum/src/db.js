@@ -182,9 +182,18 @@ const getLugarByID = async (idLugar) => {
 
 const getLogrosByUsuario = async (id_usuario) => {
     const res = await db.query(`
-        SELECT l.* FROM logros l
-        JOIN progreso_logros p ON l.id_logro = p.id_logro
-        WHERE p.id_usuario = $1`, [id_usuario]);
+        SELECT 
+            l.*, 
+            CASE 
+                WHEN p.id_usuario IS NOT NULL THEN true 
+                ELSE false 
+            END AS desbloqueado,
+            p.fecha_logro
+        FROM logros l
+        LEFT JOIN progreso_logros p 
+            ON l.id_logro = p.id_logro AND p.id_usuario = $1
+        ORDER BY l.id_logro
+    `, [id_usuario]);
     return res.rows;
 };
 

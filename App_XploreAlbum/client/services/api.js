@@ -86,6 +86,18 @@ export const listarLogros = async () => {
   }
 };
 
+//router.get('/users/:id/achievements', achievementController.getByUser);
+export const listarLogrosPorUsuario = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/achievements`);
+    console.log('[Achievements by User]\nLogros obtenidos por el usuario:\n', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar logros por usuario:', error);
+    throw error;
+  }
+};
+
 export const listarUsuarios = async () => {
   try {
     const response = await api.get('/users');
