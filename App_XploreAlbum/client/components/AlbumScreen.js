@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width, height } = Dimensions.get('window');
 const ITEM_WIDTH = (width - 48) / 3; 
 
-//App_XploreAlbum\client\assets\images\ejemplos\edificio-metalico.jpg
+//App_XploreAlbum/client/assets/images/ejemplos/edificio-metalico.jpg
 
 // Mapeo estático de imágenes - IMPORTANTE: Todas las imágenes deben estar importadas
 const imageMap = {

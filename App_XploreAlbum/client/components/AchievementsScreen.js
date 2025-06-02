@@ -106,7 +106,7 @@ const AchievementsScreen = ({ navigation }) => {
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>
             {achievements.length > 0 ? 
-              Math.round((achievements.filter(a => 2).length / achievements.length) * 100) : 0}%
+              Math.round((achievements.filter(a => a.desbloqueado).length / achievements.length) * 100) : 0}%
           </Text>
           <Text style={styles.statLabel}>Progreso</Text>
         </View>
