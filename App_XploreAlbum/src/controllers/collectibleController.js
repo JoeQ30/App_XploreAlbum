@@ -19,4 +19,14 @@ const getByUser = async (req, res, next) => {
     }
 };
 
-module.exports = { list, getByUser };
+const getCantColeccionablesDesbloqueados = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const cantidad = await db.getCantidadColeccionablesDesbloqueados(id);
+        return res.json({ cantidad });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { list, getByUser, getCantColeccionablesDesbloqueados };

@@ -42,4 +42,42 @@ const getFollowing = async (req, res, next) => {
     }
 };
 
-module.exports = { follow, unfollow, getFollowers, getFollowing };
+const getFollowingCount = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const count = await db.getSeguidosCount(id);
+        return res.json({ count });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getFollowersCount = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const count = await db.getSeguidoresCount(id);
+        return res.json({ count });
+    } catch (error) {
+        next(error);
+    }
+}
+
+const isFollowing = async (req, res, next) => {
+  try {
+    const { id } = req.params; // id del usuario seguido
+    const { id_seguidor } = req.query; // id del que pregunta si sigue
+
+    if (!id_seguidor) {
+      return res.status(400).json({ error: 'Falta id_seguidor en query params' });
+    }
+
+    const result = await db.isFollowing(id_seguidor, id);
+    return res.json({ isFollowing: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+module.exports = { follow, unfollow, getFollowers, getFollowing, getFollowingCount, getFollowersCount, isFollowing };

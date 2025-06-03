@@ -67,6 +67,8 @@ const updateUser = async (req, res, next) => {
         const { id } = req.params;
         const { nombre, correo,  foto_perfil, biografia, visibilidad_perfil } = req.body;
 
+        //console.log('[UPDATE USER] Datos de actualización:', { id, nombre, correo, foto_perfil, biografia, visibilidad_perfil });
+
         const usuario = await db.updateUsuario(
             id, 
             nombre, 

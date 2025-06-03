@@ -52,9 +52,9 @@ const ConfigurationScreen = () => {
           setNombre(user.nombre || '');
           setCorreo(user.correo || '');
           setBiografia(user.biografia || '');
-          setVisibilidad(user.visibilidad || 'público');
+          setVisibilidad(user.visibilidad_perfil || 'público');
+          //console.log('[CONFIG]: Visibilidad del perfil:', user.visibilidad_perfil);
           setFotoPerfil(user.foto_perfil || null);
-          //console.log('[CONFIG]: Usuario cargado:', user);
         }
       } catch (e) {
         console.error('Error al cargar el usuario:', e);
@@ -117,52 +117,48 @@ const ConfigurationScreen = () => {
   };
 
   const handleSave = async () => {
-    if (!validateForm()) {
-      Alert.alert('Error', 'Por favor corrige los errores en el formulario');
-      return;
+  if (!validateForm()) {
+    Alert.alert('Error', 'Por favor corrige los errores en el formulario');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    console.log('[CONFIG]: Visibilidad del perfil a enviar:', visibilidad);
+
+    const updatedUser = await actualizarUsuario(loguedUser.id, {
+      nombre,
+      correo,
+      foto_perfil: fotoPerfil,
+      biografia,
+      visibilidad_perfil: visibilidad, // ✓ Correcto
+    });
+
+    if (nuevaContraseña && confirmarContraseña && contraseñaActual) {
+      const result = await actualizarPassword(loguedUser.id, nuevaContraseña, contraseñaActual);
     }
 
-    setLoading(true);
-    try {
-      //{ nombre, correo,  foto_perfil, biografia, visibilidad_perfil }
-      const updatedUser = await actualizarUsuario(loguedUser.id, {
-        nombre,
-        correo,
-        foto_perfil: fotoPerfil,
-        biografia,
-        visibilidad,
-        
-      });
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (nuevaContraseña && confirmarContraseña && contraseñaActual) {
-        //console.log('[UPDATE PASSWORD] Actualizando contraseña... Desde:', contraseñaActual, ' -> a:', nuevaContraseña);
-        const result = await actualizarPassword(loguedUser.id, nuevaContraseña, contraseñaActual);
-        //console.log('[UPDATE PASSWORD] Resultado:', result);
-      }
+    const normalizedUser = normalizeUser(updatedUser);
+    console.log('[CONFIG]: Usuario actualizado:', normalizedUser);
 
-      // Simular llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    // Guardar en AsyncStorage
+    await AsyncStorage.setItem('usuario', JSON.stringify(normalizedUser));
+    setLoguedUser(normalizedUser);
 
-      const normalizedUser = normalizeUser(updatedUser);
-
-      // Guardar en AsyncStorage
-      await AsyncStorage.setItem('usuario', JSON.stringify(normalizedUser));
-      setLoguedUser(normalizedUser);
-
-      //console.log('[CONFIG]: Usuario actualizado:', normalizedUser);
-
-      Alert.alert(
-        'Éxito', 
-        'Configuración actualizada correctamente',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
-    } catch (error) {
-      console.error('Error al actualizar:', error);
-      Alert.alert('Error', 'No se pudo actualizar la configuración');
-    } finally {
-      setLoading(false);
-    }
-  };
+    Alert.alert(
+      'Éxito', 
+      'Configuración actualizada correctamente',
+      [{ text: 'OK', onPress: () => navigation.goBack() }]
+    );
+  } catch (error) {
+    console.error('Error al actualizar:', error);
+    Alert.alert('Error', 'No se pudo actualizar la configuración');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const VisibilityModal = () => (
     <Modal

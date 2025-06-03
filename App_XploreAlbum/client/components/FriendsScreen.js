@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import FriendItem from './Items/FriendItem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listarUsuarios } from '../services/api'; 
+import { listarUsuarios, seguirUsuario, obtenerSeguidos, isFollowing } from '../services/api'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -32,38 +32,70 @@ const FriendsScreen = () => {
     const fetchUsers = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem('usuario');
-        setLoguedUser(JSON.parse(jsonValue));
+        const parsedUser = JSON.parse(jsonValue);
+
+        if (!parsedUser?.id && !parsedUser?.id_usuario) {
+          throw new Error('Usuario inválido en AsyncStorage');
+        }
+
+        const id = parsedUser.id || parsedUser.id_usuario;
+
+        setLoguedUser({ ...parsedUser, id }); // normalizamos
 
         const data = await listarUsuarios();
         setUsers(data);
-        
-        // Aquí deberías cargar los amigos del usuario desde tu API
-        // Por ahora uso un array vacío como ejemplo
-        // const friendsData = await obtenerAmigos(JSON.parse(jsonValue).id);
-        // setFriends(friendsData);
-        setFriends([]); // Reemplaza esto con la llamada real a tu API
+
+        //console.log('Usuarios obtenidos:', parsedUser);
+
+        const friendsData = await obtenerSeguidos(id);
+        //console.log('Amigos obtenidos:', friendsData);
+        setFriends(friendsData);
       } catch (error) {
         console.error('Error al obtener usuarios:', error);
       }
     };
 
+
     fetchUsers();
   }, [])
 );
 
-  const handleAddFriend = (friendId) => {
-    console.log('Agregando amigo:', friendId);
-    // Aquí implementarías la lógica para agregar amigo
+  const handleAddFriend = async (friendId) => {
+    //console.log('Agregando amigo con ID:', friendId);
+    const data = await seguirUsuario(loguedUser?.id, friendId);
+    //console.log('Amigo agregado:', data);
+    if (data) {
+      setFriends((prevFriends) => [...prevFriends, data]);
+    }
   };
 
-  // Filtrar usuarios que NO son amigos
-  const filteredUsers = users
-    .filter((u) => u.id_usuario !== loguedUser?.id)
-    .filter((u) => !friends.some(friend => friend.id_usuario === u.id_usuario))
-    .filter((u) => 
-      searchText === '' || 
-      u.nombre.toLowerCase().includes(searchText.toLowerCase())
-    );
+  const handleViewProfile = async (user) => {
+  const isUserFollowing = await isFollowing(loguedUser?.id, user.id_usuario);
+
+  if (user.visibilidad_perfil === 'público') {
+    navigation.navigate('Profile', { user });
+    return;
+  }
+  
+  if (isUserFollowing) {
+    navigation.navigate('Profile', { user });
+  } else {
+    alert('Debes seguir a este usuario para ver su perfil.');
+  }
+};
+
+  
+const filteredUsers = users
+  .filter((u) => u.id_usuario !== loguedUser?.id)
+  .filter((u) => 
+    Array.isArray(friends) && 
+    !friends.some(friend => friend.id_usuario === u.id_usuario)
+  )
+  .filter((u) => 
+    searchText === '' || 
+    u.nombre.toLowerCase().includes(searchText.toLowerCase())
+  );
+
 
   // Filtrar amigos
   const filteredFriends = friends.filter((friend) => 
@@ -122,7 +154,7 @@ const FriendsScreen = () => {
           dataToShow.map((user, index) => (
             <TouchableOpacity 
               key={user.id_usuario}
-              onPress={() => navigation.navigate('Profile', { user })}
+              onPress={() => handleViewProfile(user)}
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel={`Ver perfil de ${user.nombre}, ubicado en ${user.ubicacion || 'ubicación no especificada'}`}

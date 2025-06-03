@@ -217,6 +217,18 @@ export const listarLogros = async () => {
   }
 };
 
+//router.get('/users/:id/achievements', achievementController.getByUser);
+export const listarLogrosPorUsuario = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/achievements`);
+    console.log('[Achievements by User]\nLogros obtenidos por el usuario:\n', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar logros por usuario:', error);
+    throw error;
+  }
+};
+
 export const listarUsuarios = async () => {
   try {
     const response = await api.get('/users');
@@ -289,5 +301,81 @@ export const obtenerLugarPorId = async (id) => {
     throw new Error('Error al obtener detalles del lugar');
   }
 };
+
+//router.post('/users/:id/follow', followController.follow);
+export const seguirUsuario = async (id, idSeguido) => {
+  try {
+    const response = await api.post(`/users/${idSeguido}/follow`, { id_seguidor: id });
+    //console.log('[FOLLOW USER] Usuario seguido:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al seguir usuario:', error);
+    throw new Error('Error al seguir usuario');
+  }
+};
+
+
+//router.get('/users/:id/following', followController.getFollowing);
+
+export const obtenerSeguidos = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/following`);
+    //console.log('[FOLLOWING USERS] Usuarios seguidos:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener usuarios seguidos:', error);
+    throw new Error('Error al obtener usuarios seguidos');
+  }
+};
+
+//router.post('/users/:id/isFollowing', followController.isFollowing);
+export const isFollowing = async (idSeguidor, idSeguido) => {
+  try {
+    const response = await api.get(`/users/${idSeguido}/isFollowing`, {
+      params: { id_seguidor: idSeguidor },
+    });
+    return response.data.isFollowing;
+  } catch (error) {
+    console.error('Error al verificar seguimiento:', error);
+    return false; // Por defecto, no permitir acceso
+  }
+};
+
+//router.get('/users/:id/following/count', followController.getFollowingCount);
+export const obtenerCantidadSeguidos = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/following/count`);
+    //console.log('[FOLLOWING COUNT] Cantidad de seguidos:', response.data);
+    return response.data.count;
+  } catch (error) {
+    console.error('Error al obtener cantidad de seguidos:', error);
+    throw new Error('Error al obtener cantidad de seguidos');
+  }
+};
+
+//router.get('/users/:id/followers/count', followController.getFollowersCount);
+export const obtenerCantidadSeguidores = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/followers/count`);
+    //console.log('[FOLLOWERS COUNT] Cantidad de seguidores:', response.data);
+    return response.data.count;
+  } catch (error) {
+    console.error('Error al obtener cantidad de seguidores:', error);
+    throw new Error('Error al obtener cantidad de seguidores');
+  }
+};
+
+//router.get('/users/:id/collectibles/count', collectibleController.getCantColeccionablesDesbloqueados);
+export const obtenerCantidadColeccionablesDesbloqueados = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}/collectibles/count`);
+    //console.log('[COLLECTIBLES COUNT] Cantidad de coleccionables desbloqueados:', response.data);
+    return response.data.cantidad;
+  } catch (error) {
+    console.error('Error al obtener cantidad de coleccionables desbloqueados:', error);
+    throw new Error('Error al obtener cantidad de coleccionables desbloqueados');
+  }
+};
+
 
 export default api;
