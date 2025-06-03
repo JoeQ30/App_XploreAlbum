@@ -20,6 +20,9 @@ import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { sendImageToBackend, saveCollectionToBackend } from '../services/api';
 
+// Configuración del umbral de confianza mínimo (puedes ajustarlo según necesites)
+const MINIMUM_CONFIDENCE_THRESHOLD = 0.9; // 
+
 const CameraScreen = () => {
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -29,6 +32,7 @@ const CameraScreen = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [predictionResult, setPredictionResult] = useState(null);
+  const [isValidPrediction, setIsValidPrediction] = useState(false); // Nueva state para validación
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [progressText, setProgressText] = useState('Iniciando análisis...');
   const cameraRef = useRef(null);
@@ -134,13 +138,24 @@ const CameraScreen = () => {
       setShowAnalysis(true);
       setAnalysisProgress(0);
       setPredictionResult(null);
+      setIsValidPrediction(false);
       
       // Call backend API for image analysis
       const result = await sendImageToBackend(photo.uri);
       
       if (result.success) {
         setPredictionResult(result);
-        setProgressText('¡Análisis completado!');
+        
+        // Validar confianza mínima
+        const confidence = result.bestPrediction?.confidence || 0;
+        const isValid = confidence >= MINIMUM_CONFIDENCE_THRESHOLD;
+        setIsValidPrediction(isValid);
+        
+        if (isValid) {
+          setProgressText('¡Análisis completado!');
+        } else {
+          setProgressText('Análisis completado');
+        }
       } else {
         throw new Error(result.error || 'No se pudo identificar el lugar');
       }
@@ -161,6 +176,7 @@ const CameraScreen = () => {
             onPress: () => {
               setCapturedPhoto(null);
               setPredictionResult(null);
+              setIsValidPrediction(false);
             }
           },
           {
@@ -180,7 +196,7 @@ const CameraScreen = () => {
   };
 
   const saveCollection = async () => {
-    if (!predictionResult || !capturedPhoto) return;
+    if (!predictionResult || !capturedPhoto || !isValidPrediction) return;
 
     try {
       setIsLoading(true);
@@ -201,6 +217,7 @@ const CameraScreen = () => {
                 setShowPreview(false);
                 setCapturedPhoto(null);
                 setPredictionResult(null);
+                setIsValidPrediction(false);
                 navigation.navigate('Collection');
               }
             },
@@ -210,6 +227,7 @@ const CameraScreen = () => {
                 setShowPreview(false);
                 setCapturedPhoto(null);
                 setPredictionResult(null);
+                setIsValidPrediction(false);
               }
             }
           ]
@@ -227,6 +245,7 @@ const CameraScreen = () => {
     setCapturedPhoto(null);
     setShowPreview(false);
     setPredictionResult(null);
+    setIsValidPrediction(false);
     setAnalysisProgress(0);
   };
 
@@ -368,13 +387,40 @@ const CameraScreen = () => {
           {/* Prediction Result */}
           {predictionResult && (
             <View style={styles.predictionResult}>
-              <Text style={styles.predictionTitle}>Lugar Identificado</Text>
-              <Text style={styles.predictionName}>
-                {predictionResult.bestPrediction.class}
-              </Text>
-              <Text style={styles.predictionConfidence}>
-                Confianza: {(predictionResult.bestPrediction.confidence * 100).toFixed(1)}%
-              </Text>
+              {isValidPrediction ? (
+                // Resultado válido - mostrar información del lugar
+                <>
+                  <View style={styles.successHeader}>
+                    <FontAwesome name="check-circle" size={24} color="#8BC34A" />
+                    <Text style={styles.predictionTitle}>¡Lugar Identificado!</Text>
+                  </View>
+                  <Text style={styles.predictionName}>
+                    {predictionResult.bestPrediction.class}
+                  </Text>
+                  <Text style={styles.predictionConfidence}>
+                    Confianza: {(predictionResult.bestPrediction.confidence * 100).toFixed(1)}%
+                  </Text>
+                </>
+              ) : (
+                // Resultado no válido - mostrar mensaje de no coincidencia
+                <>
+                  <View style={styles.errorHeader}>
+                    <FontAwesome name="times-circle" size={24} color="#FF6B6B" />
+                    <Text style={styles.noMatchTitle}>No hay coincidencias</Text>
+                  </View>
+                  <Text style={styles.noMatchMessage}>
+                    La imagen no coincide con ningún coleccionable conocido.
+                  </Text>
+                  <Text style={styles.noMatchHint}>
+                    Intenta capturar el landmark desde un ángulo diferente o asegúrate de que esté completamente visible.
+                  </Text>
+                  {predictionResult.bestPrediction && (
+                    <Text style={styles.lowConfidenceText}>
+                      Mejor coincidencia: ({(predictionResult.bestPrediction.confidence * 100).toFixed(1)}% - Muy baja)
+                    </Text>
+                  )}
+                </>
+              )}
             </View>
           )}
 
@@ -385,23 +431,41 @@ const CameraScreen = () => {
               disabled={isLoading}
             >
               <FontAwesome name="refresh" size={20} color="#666" />
-              <Text style={styles.retakeButtonText}>Repetir</Text>
+              <Text style={styles.retakeButtonText}>
+                {isValidPrediction ? 'Repetir' : 'Intentar Nuevamente'}
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.previewButton, styles.saveButton]}
-              onPress={saveCollection}
-              disabled={isLoading || !predictionResult}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <>
-                  <FontAwesome name="trophy" size={20} color="white" />
-                  <Text style={styles.saveButtonText}>Obtener Coleccionable</Text>
-                </>
-              )}
-            </TouchableOpacity>
+            {isValidPrediction ? (
+              <TouchableOpacity
+                style={[styles.previewButton, styles.saveButton]}
+                onPress={saveCollection}
+                disabled={isLoading || !predictionResult}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="white" size="small" />
+                ) : (
+                  <>
+                    <FontAwesome name="trophy" size={20} color="white" />
+                    <Text style={styles.saveButtonText}>Obtener Coleccionable</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.previewButton, styles.helpButton]}
+                onPress={() => {
+                  Alert.alert(
+                    'Consejos para mejores resultados',
+                    '• Asegúrate de que el landmark esté completamente visible\n• Toma la foto con buena iluminación\n• Evita obstáculos que tapen el lugar\n• Acércate o aléjate para obtener un mejor encuadre',
+                    [{ text: 'Entendido', style: 'default' }]
+                  );
+                }}
+              >
+                <FontAwesome name="question-circle" size={20} color="#8BC34A" />
+                <Text style={styles.helpButtonText}>Obtener Ayuda</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </Modal>
@@ -574,26 +638,68 @@ const styles = StyleSheet.create({
     bottom: 100,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.85)',
     padding: 20,
     marginHorizontal: 20,
-    borderRadius: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  // Estilos para resultado exitoso
+  successHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   predictionTitle: {
     color: '#8BC34A',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginLeft: 8,
   },
   predictionName: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   predictionConfidence: {
-    color: 'white',
+    color: '#B0B0B0',
     fontSize: 14,
+    fontWeight: '500',
+  },
+  // Estilos para resultado no válido
+  errorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  noMatchTitle: {
+    color: '#FF6B6B',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  noMatchMessage: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  noMatchHint: {
+    color: '#B0B0B0',
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  lowConfidenceText: {
+    color: '#888',
+    fontSize: 12,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 8,
   },
   previewControls: {
     flexDirection: 'row',
@@ -604,21 +710,21 @@ const styles = StyleSheet.create({
   previewButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 25,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
-    minWidth: 150,
+    minWidth: 140,
     justifyContent: 'center',
   },
   retakeButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.15)',
     borderWidth: 1,
     borderColor: '#666',
   },
   retakeButtonText: {
-    color: '#666',
+    color: '#999',
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   saveButton: {
@@ -627,7 +733,18 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'white',
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  helpButton: {
+    backgroundColor: 'rgba(139, 195, 74, 0.15)',
+    borderWidth: 1,
+    borderColor: '#8BC34A',
+  },
+  helpButtonText: {
+    color: '#8BC34A',
+    marginLeft: 8,
+    fontSize: 14,
     fontWeight: '600',
   },
 });
