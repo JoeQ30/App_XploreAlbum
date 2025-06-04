@@ -11,6 +11,8 @@ import {
   Image,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -283,169 +285,177 @@ const ConfigurationScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView 
-        style={styles.content} 
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
       >
-        {/* Foto de perfil */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Foto de perfil</Text>
-          <View style={styles.profileImageContainer}>
-            <TouchableOpacity 
-              style={styles.profileImageButton}
-              onPress={handleImagePicker}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Cambiar foto de perfil"
-            >
-              {fotoPerfil ? (
-                <Image source={{ uri: fotoPerfil }} style={styles.profileImage} />
-              ) : (
-                <View style={styles.profileImagePlaceholder}>
-                  <Icon name="person" size={60} color="#666" />
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollViewContent}
+          enableOnAndroid={true}
+        >
+          {/* Foto de perfil */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Foto de perfil</Text>
+            <View style={styles.profileImageContainer}>
+              <TouchableOpacity 
+                style={styles.profileImageButton}
+                onPress={handleImagePicker}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Cambiar foto de perfil"
+              >
+                {fotoPerfil ? (
+                  <Image source={{ uri: fotoPerfil }} style={styles.profileImage} />
+                ) : (
+                  <View style={styles.profileImagePlaceholder}>
+                    <Icon name="person" size={60} color="#666" />
+                  </View>
+                )}
+                <View style={styles.cameraIconContainer}>
+                  <Icon name="camera-alt" size={20} color="white" />
                 </View>
-              )}
-              <View style={styles.cameraIconContainer}>
-                <Icon name="camera-alt" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Información personal */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Información personal</Text>
+            <View style={styles.formContainer}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Nombre</Text>
+                <TextInput
+                  style={[styles.input, errors.nombre && styles.inputError]}
+                  value={nombre}
+                  onChangeText={setNombre}
+                  placeholder="Ingresa tu nombre"
+                  accessible={true}
+                  accessibilityLabel="Campo de nombre"
+                />
+                {errors.nombre && (
+                  <Text style={styles.errorText}>{errors.nombre}</Text>
+                )}
               </View>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        {/* Información personal */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información personal</Text>
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Nombre</Text>
-              <TextInput
-                style={[styles.input, errors.nombre && styles.inputError]}
-                value={nombre}
-                onChangeText={setNombre}
-                placeholder="Ingresa tu nombre"
-                accessible={true}
-                accessibilityLabel="Campo de nombre"
-              />
-              {errors.nombre && (
-                <Text style={styles.errorText}>{errors.nombre}</Text>
-              )}
-            </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Correo electrónico</Text>
+                <TextInput
+                  style={[styles.input, errors.correo && styles.inputError]}
+                  value={correo}
+                  onChangeText={setCorreo}
+                  placeholder="Ingresa tu correo"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  accessible={true}
+                  accessibilityLabel="Campo de correo electrónico"
+                />
+                {errors.correo && (
+                  <Text style={styles.errorText}>{errors.correo}</Text>
+                )}
+              </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Correo electrónico</Text>
-              <TextInput
-                style={[styles.input, errors.correo && styles.inputError]}
-                value={correo}
-                onChangeText={setCorreo}
-                placeholder="Ingresa tu correo"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                accessible={true}
-                accessibilityLabel="Campo de correo electrónico"
-              />
-              {errors.correo && (
-                <Text style={styles.errorText}>{errors.correo}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Biografía</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={biografia}
-                onChangeText={setBiografia}
-                placeholder="Cuéntanos sobre ti..."
-                multiline={true}
-                numberOfLines={3}
-                textAlignVertical="top"
-                accessible={true}
-                accessibilityLabel="Campo de biografía"
-              />
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Biografía</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={biografia}
+                  onChangeText={setBiografia}
+                  placeholder="Cuéntanos sobre ti..."
+                  multiline={true}
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  accessible={true}
+                  accessibilityLabel="Campo de biografía"
+                />
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Privacidad */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacidad</Text>
-          <View style={styles.formContainer}>
-            <TouchableOpacity 
-              style={styles.visibilityButton}
-              onPress={() => setShowVisibilityModal(true)}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Seleccionar visibilidad del perfil"
-            >
-              <View style={styles.visibilityButtonContent}>
-                <View>
-                  <Text style={styles.inputLabel}>Visibilidad del perfil</Text>
-                  <Text style={styles.visibilityValue}>
-                    {visibilidad === 'público' ? 'Público' : 'Solo seguidores'}
-                  </Text>
+          {/* Privacidad */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Privacidad</Text>
+            <View style={styles.formContainer}>
+              <TouchableOpacity 
+                style={styles.visibilityButton}
+                onPress={() => setShowVisibilityModal(true)}
+                accessible={true}
+                accessibilityRole="button"
+                accessibilityLabel="Seleccionar visibilidad del perfil"
+              >
+                <View style={styles.visibilityButtonContent}>
+                  <View>
+                    <Text style={styles.inputLabel}>Visibilidad del perfil</Text>
+                    <Text style={styles.visibilityValue}>
+                      {visibilidad === 'público' ? 'Público' : 'Solo seguidores'}
+                    </Text>
+                  </View>
+                  <Icon name="keyboard-arrow-right" size={24} color="#8BC34A" />
                 </View>
-                <Icon name="keyboard-arrow-right" size={24} color="#8BC34A" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Seguridad */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seguridad</Text>
+            <View style={styles.formContainer}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Contraseña actual</Text>
+                <TextInput
+                  style={[styles.input, errors.contraseñaActual && styles.inputError]}
+                  value={contraseñaActual}
+                  onChangeText={setContraseñaActual}
+                  placeholder="Ingresa tu contraseña actual"
+                  secureTextEntry={true}
+                  accessible={true}
+                  accessibilityLabel="Campo de contraseña actual"
+                />
+                {errors.contraseñaActual && (
+                  <Text style={styles.errorText}>{errors.contraseñaActual}</Text>
+                )}
               </View>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        {/* Seguridad */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Seguridad</Text>
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Contraseña actual</Text>
-              <TextInput
-                style={[styles.input, errors.contraseñaActual && styles.inputError]}
-                value={contraseñaActual}
-                onChangeText={setContraseñaActual}
-                placeholder="Ingresa tu contraseña actual"
-                secureTextEntry={true}
-                accessible={true}
-                accessibilityLabel="Campo de contraseña actual"
-              />
-              {errors.contraseñaActual && (
-                <Text style={styles.errorText}>{errors.contraseñaActual}</Text>
-              )}
-            </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Nueva contraseña</Text>
+                <TextInput
+                  style={[styles.input, errors.nuevaContraseña && styles.inputError]}
+                  value={nuevaContraseña}
+                  onChangeText={setNuevaContraseña}
+                  placeholder="Ingresa una nueva contraseña"
+                  secureTextEntry={true}
+                  accessible={true}
+                  accessibilityLabel="Campo de nueva contraseña"
+                />
+                {errors.nuevaContraseña && (
+                  <Text style={styles.errorText}>{errors.nuevaContraseña}</Text>
+                )}
+              </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Nueva contraseña</Text>
-              <TextInput
-                style={[styles.input, errors.nuevaContraseña && styles.inputError]}
-                value={nuevaContraseña}
-                onChangeText={setNuevaContraseña}
-                placeholder="Ingresa una nueva contraseña"
-                secureTextEntry={true}
-                accessible={true}
-                accessibilityLabel="Campo de nueva contraseña"
-              />
-              {errors.nuevaContraseña && (
-                <Text style={styles.errorText}>{errors.nuevaContraseña}</Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Confirmar nueva contraseña</Text>
-              <TextInput
-                style={[styles.input, errors.confirmarContraseña && styles.inputError]}
-                value={confirmarContraseña}
-                onChangeText={setConfirmarContraseña}
-                placeholder="Confirma tu nueva contraseña"
-                secureTextEntry={true}
-                accessible={true}
-                accessibilityLabel="Campo de confirmación de contraseña"
-              />
-              {errors.confirmarContraseña && (
-                <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>
-              )}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Confirmar nueva contraseña</Text>
+                <TextInput
+                  style={[styles.input, errors.confirmarContraseña && styles.inputError]}
+                  value={confirmarContraseña}
+                  onChangeText={setConfirmarContraseña}
+                  placeholder="Confirma tu nueva contraseña"
+                  secureTextEntry={true}
+                  accessible={true}
+                  accessibilityLabel="Campo de confirmación de contraseña"
+                />
+                {errors.confirmarContraseña && (
+                  <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>
+                )}
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.bottomSpacer} />
-      </ScrollView>
+          <View style={styles.bottomSpacer} />
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <VisibilityModal />
     </SafeAreaView>
@@ -456,6 +466,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   header: {
     backgroundColor: '#4A4A4A',
@@ -493,6 +506,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: 20, // Espacio adicional al final
   },
   section: {
     marginHorizontal: 15,
@@ -593,7 +610,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   bottomSpacer: {
-    height: 50,
+    height: 100, // Aumentado para más espacio cuando el teclado esté visible
   },
   modalOverlay: {
     flex: 1,

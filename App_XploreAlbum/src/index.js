@@ -17,7 +17,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = 3000;
-const HOST = '10.24.30.205'; 
+const HOST = '192.168.6.182'; 
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor corriendo en http://${HOST}:${PORT}`);

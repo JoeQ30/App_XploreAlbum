@@ -4,7 +4,7 @@ import { normalizeUser } from '../utils/user';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PORT = 3000;
-const HOST = '10.24.30.205';
+const HOST = '192.168.6.182';
 const API_BASE_URL = `http://${HOST}:${PORT}`; 
 
 const api = axios.create({

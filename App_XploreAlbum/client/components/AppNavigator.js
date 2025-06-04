@@ -6,6 +6,7 @@ import CameraScreen from './CameraScreen';
 import FriendsScreen from './FriendsScreen';
 import ProfileScreen from './ProfileScreen';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AppNavigator = () => {
   const [activeTab, setActiveTab] = useState('Album');
@@ -24,12 +25,17 @@ const AppNavigator = () => {
     }, [])
   );
 
+  // Función para navegar a la cámara desde el álbum
+  const handleNavigateToCamera = () => {
+    setActiveTab('Cámara');
+  };
+
   const renderActiveScreen = () => {
     switch(activeTab) {
       case 'Cámara':
         return <CameraScreen />;
       case 'Album':
-        return <AlbumScreen />;
+        return <AlbumScreen onNavigateToCamera={handleNavigateToCamera} />;
       case 'Amigos':
         return <FriendsScreen />;
       case 'Perfil':
@@ -62,4 +68,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AppNavigator;
+export default AppNavigator;

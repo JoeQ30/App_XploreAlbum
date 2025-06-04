@@ -236,7 +236,7 @@ const ColeccionableItem = ({ coleccionable, fotos, onPress }) => {
   );
 };
 
-const AlbumScreen = () => {
+const AlbumScreen = ({onNavigateToCamera}) => {
   const [activeTab, setActiveTab] = useState('Todos');
   const navigation = useNavigation();
   const [coleccionables, setColeccionables] = useState([]);
@@ -307,13 +307,15 @@ const AlbumScreen = () => {
     setModalVisible(false);
     setSelectedCollectible(null);
     
-    // Aquí puedes navegar a la pantalla de cámara o implementar la lógica de desbloqueo
-    // Por ejemplo:
-    // navigation.navigate('Camera', { collectible });
+    // Navegar a CameraScreen con el coleccionable como parámetro
+    if (onNavigateToCamera) {
+      onNavigateToCamera();
+    } else {
+      console.error('onNavigateToCamera no está disponible');
+    }
     
-    // Por ahora, solo mostramos un log
-    //console.log('Navegando a cámara para desbloquear:', collectible.nombre);
-  };
+    console.log('Navegando a cámara para desbloquear:', collectible.nombre);
+    };
 
   const handleCloseModal = () => {
     setModalVisible(false);

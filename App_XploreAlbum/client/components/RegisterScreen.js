@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert, Modal, FlatList, ScrollView } from 'react-native';
+import { 
+  View, 
+  TextInput, 
+  Text, 
+  TouchableOpacity, 
+  Image, 
+  StyleSheet, 
+  Alert, 
+  Modal, 
+  FlatList, 
+  ScrollView, 
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { register } from '../services/api'; // Asume que tienes esta función
@@ -179,329 +194,339 @@ export default function RegisterForm() {
   };
 
   return (
-    React.createElement(ScrollView, {
-      style: styles.scrollContainer,
-      contentContainerStyle: styles.container,
-      showsVerticalScrollIndicator: false,
-      keyboardShouldPersistTaps: "handled",
-      accessible: false,
-      accessibilityLabel: "Pantalla de registro"
+    React.createElement(KeyboardAvoidingView, {
+      style: styles.keyboardAvoidingView,
+      behavior: Platform.OS === 'ios' ? 'padding' : 'height',
+      keyboardVerticalOffset: Platform.OS === 'ios' ? 0 : 20
     },
-      // Logo
-      React.createElement(View, { style: styles.logoContainer },
-        React.createElement(Image, { source: logo, style: styles.logo })
-      ),
-
-      // Tarjeta de registro
-      React.createElement(View, {
-        style: styles.registerCard,
-        accessible: false,
-        accessibilityLabel: "Formulario de registro"
+      React.createElement(TouchableWithoutFeedback, {
+        onPress: Keyboard.dismiss
       },
-        React.createElement(Text, {
-          style: styles.title,
-          accessible: true,
-          accessibilityRole: "header",
-          accessibilityLevel: 1
-        }, "Crear Cuenta"),
-        
-        React.createElement(View, {
-          style: styles.loginSection,
-          accessible: true,
-          accessibilityLabel: "Opción de inicio de sesión"
+        React.createElement(ScrollView, {
+          style: styles.scrollContainer,
+          contentContainerStyle: styles.container,
+          showsVerticalScrollIndicator: false,
+          keyboardShouldPersistTaps: "handled",
+          accessible: false,
+          accessibilityLabel: "Pantalla de registro"
         },
-          React.createElement(Text, {
-            style: styles.loginText,
-            accessible: true,
-            accessibilityRole: "text"
-          }, "¿Ya tienes una cuenta? "),
-          React.createElement(TouchableOpacity, {
-            onPress: () => navigation.navigate('Login'),
-            accessible: true,
-            accessibilityRole: "button",
-            accessibilityLabel: "Iniciar sesión",
-            accessibilityHint: "Ir a la pantalla de inicio de sesión"
-          },
-            React.createElement(Text, { style: styles.loginLink }, "Iniciar Sesión")
-          )
-        ),
-
-        // Campo Nombre
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Nombre Completo"),
-        React.createElement(TextInput, {
-          style: styles.input,
-          value: nombre,
-          onChangeText: setNombre,
-          autoCapitalize: "words",
-          placeholder: "Ingresa tu nombre completo",
-          accessible: true,
-          accessibilityLabel: "Campo de nombre completo",
-          accessibilityHint: "Ingresa tu nombre completo",
-          accessibilityRole: "none",
-          textContentType: "name",
-          autoComplete: "name"
-        }),
-
-        // Campo Email
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Email"),
-        React.createElement(TextInput, {
-          style: styles.input,
-          value: email,
-          onChangeText: setEmail,
-          autoCapitalize: "none",
-          keyboardType: "email-address",
-          placeholder: "usuario@ejemplo.com",
-          accessible: true,
-          accessibilityLabel: "Campo de correo electrónico",
-          accessibilityHint: "Ingresa tu dirección de correo electrónico",
-          accessibilityRole: "none",
-          textContentType: "emailAddress",
-          autoComplete: "email"
-        }),
-
-        // Campo Provincia
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Provincia"),
-        React.createElement(TouchableOpacity, {
-          style: [styles.input, styles.selectButton],
-          onPress: () => setShowProvinciaModal(true),
-          accessible: true,
-          accessibilityRole: "button",
-          accessibilityLabel: "Seleccionar provincia",
-          accessibilityHint: "Abre la lista de provincias para seleccionar"
-        },
-          React.createElement(Text, {
-            style: [styles.selectButtonText, !provincia && styles.placeholder]
-          }, provincia || 'Selecciona tu provincia'),
-          React.createElement(MaterialIcons, {
-            name: "keyboard-arrow-down",
-            size: 24,
-            color: "#999"
-          })
-        ),
-
-        // Campo Cantón
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Cantón"),
-        React.createElement(TouchableOpacity, {
-          style: [
-            styles.input,
-            styles.selectButton,
-            ((provincia === 'Extranjero' || !provincia) && styles.inputDisabled)
-          ],
-          onPress: () => provincia !== 'Extranjero' && provincia && setShowCantonModal(true),
-          disabled: provincia === 'Extranjero' || !provincia,
-          accessible: true,
-          accessibilityRole: "button",
-          accessibilityLabel: "Seleccionar cantón",
-          accessibilityHint: provincia === 'Extranjero' ? 'Campo deshabilitado para extranjeros' : 'Abre la lista de cantones para seleccionar'
-        },
-          React.createElement(Text, {
-            style: [
-              styles.selectButtonText,
-              !canton && styles.placeholder,
-              ((provincia === 'Extranjero' || !provincia) && styles.textDisabled)
-            ]
-          }, provincia === 'Extranjero' ? 'No aplica' : (canton || 'Selecciona tu cantón')),
-          React.createElement(MaterialIcons, {
-            name: "keyboard-arrow-down",
-            size: 24,
-            color: provincia === 'Extranjero' || !provincia ? "#ccc" : "#999"
-          })
-        ),
-
-        // Campo Contraseña
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Contraseña"),
-        React.createElement(View, {
-          style: styles.passwordContainer,
-          accessible: false
-        },
-          React.createElement(TextInput, {
-            style: styles.passwordInput,
-            value: password,
-            onChangeText: setPassword,
-            secureTextEntry: !mostrarPassword,
-            placeholder: "••••••••",
-            accessible: true,
-            accessibilityLabel: "Campo de contraseña",
-            accessibilityHint: "Ingresa tu contraseña",
-            accessibilityRole: "none",
-            textContentType: "newPassword",
-            autoComplete: "password-new"
-          }),
-          React.createElement(TouchableOpacity, {
-            style: styles.eyeIcon,
-            onPress: toggleMostrarPassword,
-            accessible: true,
-            accessibilityRole: "button",
-            accessibilityLabel: mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña",
-            accessibilityHint: mostrarPassword ? "Oculta la contraseña" : "Muestra la contraseña"
-          },
-            React.createElement(MaterialIcons, {
-              name: mostrarPassword ? "visibility-off" : "visibility",
-              size: 24,
-              color: "#999",
-              accessible: false
-            })
-          )
-        ),
-
-        // Campo Confirmar Contraseña
-        React.createElement(Text, {
-          style: styles.label,
-          accessible: true,
-          accessibilityRole: "text"
-        }, "Confirmar Contraseña"),
-        React.createElement(View, {
-          style: getPasswordConfirmStyle(),
-          accessible: false
-        },
-          React.createElement(TextInput, {
-            style: styles.passwordInput,
-            value: confirmPassword,
-            onChangeText: setConfirmPassword,
-            secureTextEntry: !mostrarConfirmPassword,
-            placeholder: "••••••••",
-            accessible: true,
-            accessibilityLabel: "Campo de confirmación de contraseña",
-            accessibilityHint: "Confirma tu contraseña",
-            accessibilityRole: "none",
-            textContentType: "newPassword",
-            autoComplete: "password-new"
-          }),
-          React.createElement(TouchableOpacity, {
-            style: styles.eyeIcon,
-            onPress: toggleMostrarConfirmPassword,
-            accessible: true,
-            accessibilityRole: "button",
-            accessibilityLabel: mostrarConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"
-          },
-            React.createElement(MaterialIcons, {
-              name: mostrarConfirmPassword ? "visibility-off" : "visibility",
-              size: 24,
-              color: "#999",
-              accessible: false
-            })
+          // Logo
+          React.createElement(View, { style: styles.logoContainer },
+            React.createElement(Image, { source: logo, style: styles.logo })
           ),
-          passwordsMatch !== null && React.createElement(View, { style: styles.matchIndicator },
-            React.createElement(Text, { style: styles.matchIcon }, passwordsMatch ? "✓" : "✗")
-          )
-        ),
 
-        // Mensaje de estado de contraseñas
-        passwordsMatch !== null && React.createElement(Text, {
-          style: [
-            styles.passwordMessage,
-            passwordsMatch ? styles.passwordMessageSuccess : styles.passwordMessageError
-          ],
-          accessible: true,
-          accessibilityRole: "text"
-        }, passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"),
-
-        React.createElement(TouchableOpacity, {
-          style: [
-            styles.registerButton,
-            ((!nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton)) && styles.buttonDisabled)
-          ],
-          onPress: handleRegister,
-          disabled: !nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton),
-          accessible: true,
-          accessibilityRole: "button",
-          accessibilityLabel: "Crear cuenta",
-          accessibilityHint: "Crea una nueva cuenta con los datos ingresados"
-        },
-          React.createElement(Text, {
-            style: [
-              styles.registerButtonText,
-              ((!nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton)) && styles.buttonTextDisabled)
-            ],
-            accessible: false
-          }, "Crear Cuenta")
-        )
-      ),
-
-      // Modal para Provincias
-      React.createElement(Modal, {
-        visible: showProvinciaModal,
-        transparent: true,
-        animationType: "slide",
-        onRequestClose: () => setShowProvinciaModal(false)
-      },
-        React.createElement(View, { style: styles.modalOverlay },
-          React.createElement(View, { style: styles.modalContainer },
-            React.createElement(View, { style: styles.modalHeader },
-              React.createElement(Text, { style: styles.modalTitle }, "Seleccionar Provincia"),
+          // Tarjeta de registro
+          React.createElement(View, {
+            style: styles.registerCard,
+            accessible: false,
+            accessibilityLabel: "Formulario de registro"
+          },
+            React.createElement(Text, {
+              style: styles.title,
+              accessible: true,
+              accessibilityRole: "header",
+              accessibilityLevel: 1
+            }, "Crear Cuenta"),
+            
+            React.createElement(View, {
+              style: styles.loginSection,
+              accessible: true,
+              accessibilityLabel: "Opción de inicio de sesión"
+            },
+              React.createElement(Text, {
+                style: styles.loginText,
+                accessible: true,
+                accessibilityRole: "text"
+              }, "¿Ya tienes una cuenta? "),
               React.createElement(TouchableOpacity, {
-                onPress: () => setShowProvinciaModal(false),
+                onPress: () => navigation.navigate('Login'),
                 accessible: true,
                 accessibilityRole: "button",
-                accessibilityLabel: "Cerrar modal"
+                accessibilityLabel: "Iniciar sesión",
+                accessibilityHint: "Ir a la pantalla de inicio de sesión"
+              },
+                React.createElement(Text, { style: styles.loginLink }, "Iniciar Sesión")
+              )
+            ),
+
+            // Campo Nombre
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Nombre Completo"),
+            React.createElement(TextInput, {
+              style: styles.input,
+              value: nombre,
+              onChangeText: setNombre,
+              autoCapitalize: "words",
+              placeholder: "Ingresa tu nombre completo",
+              accessible: true,
+              accessibilityLabel: "Campo de nombre completo",
+              accessibilityHint: "Ingresa tu nombre completo",
+              accessibilityRole: "none",
+              textContentType: "name",
+              autoComplete: "name"
+            }),
+
+            // Campo Email
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Email"),
+            React.createElement(TextInput, {
+              style: styles.input,
+              value: email,
+              onChangeText: setEmail,
+              autoCapitalize: "none",
+              keyboardType: "email-address",
+              placeholder: "usuario@ejemplo.com",
+              accessible: true,
+              accessibilityLabel: "Campo de correo electrónico",
+              accessibilityHint: "Ingresa tu dirección de correo electrónico",
+              accessibilityRole: "none",
+              textContentType: "emailAddress",
+              autoComplete: "email"
+            }),
+
+            // Campo Provincia
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Provincia"),
+            React.createElement(TouchableOpacity, {
+              style: [styles.input, styles.selectButton],
+              onPress: () => setShowProvinciaModal(true),
+              accessible: true,
+              accessibilityRole: "button",
+              accessibilityLabel: "Seleccionar provincia",
+              accessibilityHint: "Abre la lista de provincias para seleccionar"
+            },
+              React.createElement(Text, {
+                style: [styles.selectButtonText, !provincia && styles.placeholder]
+              }, provincia || 'Selecciona tu provincia'),
+              React.createElement(MaterialIcons, {
+                name: "keyboard-arrow-down",
+                size: 24,
+                color: "#999"
+              })
+            ),
+
+            // Campo Cantón
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Cantón"),
+            React.createElement(TouchableOpacity, {
+              style: [
+                styles.input,
+                styles.selectButton,
+                ((provincia === 'Extranjero' || !provincia) && styles.inputDisabled)
+              ],
+              onPress: () => provincia !== 'Extranjero' && provincia && setShowCantonModal(true),
+              disabled: provincia === 'Extranjero' || !provincia,
+              accessible: true,
+              accessibilityRole: "button",
+              accessibilityLabel: "Seleccionar cantón",
+              accessibilityHint: provincia === 'Extranjero' ? 'Campo deshabilitado para extranjeros' : 'Abre la lista de cantones para seleccionar'
+            },
+              React.createElement(Text, {
+                style: [
+                  styles.selectButtonText,
+                  !canton && styles.placeholder,
+                  ((provincia === 'Extranjero' || !provincia) && styles.textDisabled)
+                ]
+              }, provincia === 'Extranjero' ? 'No aplica' : (canton || 'Selecciona tu cantón')),
+              React.createElement(MaterialIcons, {
+                name: "keyboard-arrow-down",
+                size: 24,
+                color: provincia === 'Extranjero' || !provincia ? "#ccc" : "#999"
+              })
+            ),
+
+            // Campo Contraseña
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Contraseña"),
+            React.createElement(View, {
+              style: styles.passwordContainer,
+              accessible: false
+            },
+              React.createElement(TextInput, {
+                style: styles.passwordInput,
+                value: password,
+                onChangeText: setPassword,
+                secureTextEntry: !mostrarPassword,
+                placeholder: "••••••••",
+                accessible: true,
+                accessibilityLabel: "Campo de contraseña",
+                accessibilityHint: "Ingresa tu contraseña",
+                accessibilityRole: "none",
+                textContentType: "newPassword",
+                autoComplete: "password-new"
+              }),
+              React.createElement(TouchableOpacity, {
+                style: styles.eyeIcon,
+                onPress: toggleMostrarPassword,
+                accessible: true,
+                accessibilityRole: "button",
+                accessibilityLabel: mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña",
+                accessibilityHint: mostrarPassword ? "Oculta la contraseña" : "Muestra la contraseña"
               },
                 React.createElement(MaterialIcons, {
-                  name: "close",
+                  name: mostrarPassword ? "visibility-off" : "visibility",
                   size: 24,
-                  color: "#333"
+                  color: "#999",
+                  accessible: false
                 })
               )
             ),
-            React.createElement(FlatList, {
-              data: provincias,
-              renderItem: renderProvinciaItem,
-              keyExtractor: (item) => item,
-              style: styles.modalList
-            })
-          )
-        )
-      ),
 
-      // Modal para Cantones
-      React.createElement(Modal, {
-        visible: showCantonModal,
-        transparent: true,
-        animationType: "slide",
-        onRequestClose: () => setShowCantonModal(false)
-      },
-        React.createElement(View, { style: styles.modalOverlay },
-          React.createElement(View, { style: styles.modalContainer },
-            React.createElement(View, { style: styles.modalHeader },
-              React.createElement(Text, { style: styles.modalTitle }, "Seleccionar Cantón"),
+            // Campo Confirmar Contraseña
+            React.createElement(Text, {
+              style: styles.label,
+              accessible: true,
+              accessibilityRole: "text"
+            }, "Confirmar Contraseña"),
+            React.createElement(View, {
+              style: getPasswordConfirmStyle(),
+              accessible: false
+            },
+              React.createElement(TextInput, {
+                style: styles.passwordInput,
+                value: confirmPassword,
+                onChangeText: setConfirmPassword,
+                secureTextEntry: !mostrarConfirmPassword,
+                placeholder: "••••••••",
+                accessible: true,
+                accessibilityLabel: "Campo de confirmación de contraseña",
+                accessibilityHint: "Confirma tu contraseña",
+                accessibilityRole: "none",
+                textContentType: "newPassword",
+                autoComplete: "password-new"
+              }),
               React.createElement(TouchableOpacity, {
-                onPress: () => setShowCantonModal(false),
+                style: styles.eyeIcon,
+                onPress: toggleMostrarConfirmPassword,
                 accessible: true,
                 accessibilityRole: "button",
-                accessibilityLabel: "Cerrar modal"
+                accessibilityLabel: mostrarConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"
               },
                 React.createElement(MaterialIcons, {
-                  name: "close",
+                  name: mostrarConfirmPassword ? "visibility-off" : "visibility",
                   size: 24,
-                  color: "#333"
+                  color: "#999",
+                  accessible: false
                 })
+              ),
+              passwordsMatch !== null && React.createElement(View, { style: styles.matchIndicator },
+                React.createElement(Text, { style: styles.matchIcon }, passwordsMatch ? "✓" : "✗")
               )
             ),
-            React.createElement(FlatList, {
-              data: getAvailableCantones(),
-              renderItem: renderCantonItem,
-              keyExtractor: (item) => item,
-              style: styles.modalList
-            })
+
+            // Mensaje de estado de contraseñas
+            passwordsMatch !== null && React.createElement(Text, {
+              style: [
+                styles.passwordMessage,
+                passwordsMatch ? styles.passwordMessageSuccess : styles.passwordMessageError
+              ],
+              accessible: true,
+              accessibilityRole: "text"
+            }, passwordsMatch ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"),
+
+            React.createElement(TouchableOpacity, {
+              style: [
+                styles.registerButton,
+                ((!nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton)) && styles.buttonDisabled)
+              ],
+              onPress: handleRegister,
+              disabled: !nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton),
+              accessible: true,
+              accessibilityRole: "button",
+              accessibilityLabel: "Crear cuenta",
+              accessibilityHint: "Crea una nueva cuenta con los datos ingresados"
+            },
+              React.createElement(Text, {
+                style: [
+                  styles.registerButtonText,
+                  ((!nombre || !email || !password || !confirmPassword || !passwordsMatch || !provincia || (provincia !== 'Extranjero' && !canton)) && styles.buttonTextDisabled)
+                ],
+                accessible: false
+              }, "Crear Cuenta")
+            )
+          ),
+
+          // Modal para Provincias
+          React.createElement(Modal, {
+            visible: showProvinciaModal,
+            transparent: true,
+            animationType: "slide",
+            onRequestClose: () => setShowProvinciaModal(false)
+          },
+            React.createElement(View, { style: styles.modalOverlay },
+              React.createElement(View, { style: styles.modalContainer },
+                React.createElement(View, { style: styles.modalHeader },
+                  React.createElement(Text, { style: styles.modalTitle }, "Seleccionar Provincia"),
+                  React.createElement(TouchableOpacity, {
+                    onPress: () => setShowProvinciaModal(false),
+                    accessible: true,
+                    accessibilityRole: "button",
+                    accessibilityLabel: "Cerrar modal"
+                  },
+                    React.createElement(MaterialIcons, {
+                      name: "close",
+                      size: 24,
+                      color: "#333"
+                    })
+                  )
+                ),
+                React.createElement(FlatList, {
+                  data: provincias,
+                  renderItem: renderProvinciaItem,
+                  keyExtractor: (item) => item,
+                  style: styles.modalList
+                })
+              )
+            )
+          ),
+
+          // Modal para Cantones
+          React.createElement(Modal, {
+            visible: showCantonModal,
+            transparent: true,
+            animationType: "slide",
+            onRequestClose: () => setShowCantonModal(false)
+          },
+            React.createElement(View, { style: styles.modalOverlay },
+              React.createElement(View, { style: styles.modalContainer },
+                React.createElement(View, { style: styles.modalHeader },
+                  React.createElement(Text, { style: styles.modalTitle }, "Seleccionar Cantón"),
+                  React.createElement(TouchableOpacity, {
+                    onPress: () => setShowCantonModal(false),
+                    accessible: true,
+                    accessibilityRole: "button",
+                    accessibilityLabel: "Cerrar modal"
+                  },
+                    React.createElement(MaterialIcons, {
+                      name: "close",
+                      size: 24,
+                      color: "#333"
+                    })
+                  )
+                ),
+                React.createElement(FlatList, {
+                  data: getAvailableCantones(),
+                  renderItem: renderCantonItem,
+                  keyExtractor: (item) => item,
+                  style: styles.modalList
+                })
+              )
+            )
           )
         )
       )
@@ -510,6 +535,9 @@ export default function RegisterForm() {
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   scrollContainer: {
     flex: 1,
     backgroundColor: '#8BC34A',
