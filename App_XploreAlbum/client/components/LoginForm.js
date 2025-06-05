@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/api';
@@ -11,14 +11,60 @@ export default function LoginForm() {
   const [correo, setCorreo] = useState('');
   const [contraseña, setContraseña] = useState('');
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
+  const [recordarUsuario, setRecordarUsuario] = useState(false);
   const navigation = useNavigation();
+
+  // Cargar credenciales guardadas al inicializar el componente
+  useEffect(() => {
+    cargarCredencialesGuardadas();
+  }, []);
+
+  const cargarCredencialesGuardadas = async () => {
+    try {
+      const credencialesGuardadas = await AsyncStorage.getItem('credencialesUsuario');
+      if (credencialesGuardadas) {
+        const { correo: correoGuardado, contraseña: contraseñaGuardada } = JSON.parse(credencialesGuardadas);
+        setCorreo(correoGuardado);
+        setContraseña(contraseñaGuardada);
+        setRecordarUsuario(true);
+      }
+    } catch (error) {
+      console.error('Error al cargar credenciales:', error);
+    }
+  };
+
+  const guardarCredenciales = async () => {
+    try {
+      const credenciales = {
+        correo,
+        contraseña
+      };
+      await AsyncStorage.setItem('credencialesUsuario', JSON.stringify(credenciales));
+    } catch (error) {
+      console.error('Error al guardar credenciales:', error);
+    }
+  };
+
+  const eliminarCredencialesGuardadas = async () => {
+    try {
+      await AsyncStorage.removeItem('credencialesUsuario');
+    } catch (error) {
+      console.error('Error al eliminar credenciales:', error);
+    }
+  };
 
   const handleLogin = async () => {
     try {
       const userData = await login(correo, contraseña);
-      //console.log(correo, contraseña);
+      
+      // Guardar o eliminar credenciales según la opción seleccionada
+      if (recordarUsuario) {
+        await guardarCredenciales();
+      } else {
+        await eliminarCredencialesGuardadas();
+      }
+      
       Alert.alert('Bienvenido', `Hola ${userData.nombre}`);
-    
       navigation.navigate('Navigator');
     } catch (error) {
       console.error(error);
@@ -28,6 +74,10 @@ export default function LoginForm() {
 
   const toggleMostrarContraseña = () => {
     setMostrarContraseña(!mostrarContraseña);
+  };
+
+  const toggleRecordarUsuario = () => {
+    setRecordarUsuario(!recordarUsuario);
   };
 
   return (
@@ -80,7 +130,6 @@ export default function LoginForm() {
             onPress={() => navigation.navigate('Register')}
           >
             <Text style={styles.registerLink}>Registrarme</Text>
-
           </TouchableOpacity>
         </View>
 
@@ -144,6 +193,40 @@ export default function LoginForm() {
               color="#999"
               accessible={false}
             />
+          </TouchableOpacity>
+        </View>
+
+        {/* Checkbox para recordar usuario */}
+        <View 
+          style={styles.checkboxContainer}
+          accessible={true}
+          accessibilityLabel="Opción recordar usuario"
+        >
+          <TouchableOpacity 
+            style={styles.checkbox}
+            onPress={toggleRecordarUsuario}
+            accessible={true}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: recordarUsuario }}
+            accessibilityLabel="Recordarme"
+            accessibilityHint="Guarda tus credenciales para el próximo inicio de sesión"
+          >
+            <View style={[styles.checkboxBox, recordarUsuario && styles.checkboxChecked]}>
+              {recordarUsuario && (
+                <MaterialIcons 
+                  name="check" 
+                  size={14} 
+                  color="white"
+                  accessible={false}
+                />
+              )}
+            </View>
+            <Text 
+              style={styles.checkboxText}
+              accessible={false}
+            >
+              Recordarme
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -301,7 +384,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-    marginTop: 35,
+    marginTop: 10,
   },
   loginButtonText: {
     color: 'white',
